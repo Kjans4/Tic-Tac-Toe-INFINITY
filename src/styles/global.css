@@ -1,0 +1,31 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --color-gold: #FFD700;
+  --color-warning: #FFB6C1;
+  --color-x: #3b82f6;
+  --color-o: #ef4444;
+  --color-bg: #f4f4f4;
+  --color-cell-bg: #ffffff;
+  --color-border: #d1d5db;
+  --transition-highlight: background-color 0.25s ease;
+}
+
+body {
+  background-color: var(--color-bg);
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-wrapper {
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+}

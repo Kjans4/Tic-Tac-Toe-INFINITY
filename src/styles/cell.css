@@ -1,0 +1,39 @@
+.cell {
+  width: 100px;
+  height: 100px;
+  font-size: 2rem;
+  font-weight: bold;
+  border: 2px solid var(--color-border);
+  border-radius: 8px;
+  background-color: var(--color-cell-bg);
+  cursor: pointer;
+  transition: var(--transition-highlight);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cell--x {
+  color: var(--color-x);
+}
+
+.cell--o {
+  color: var(--color-o);
+}
+
+.cell--winner {
+  background-color: var(--color-gold);
+}
+
+.cell--warning {
+  background-color: var(--color-warning);
+}
+
+.cell:hover:not(:disabled) {
+  background-color: #f0f0f0;
+}
+
+.cell--winner:hover,
+.cell--warning:hover {
+  background-color: inherit;
+}

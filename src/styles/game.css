@@ -1,0 +1,73 @@
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.game-mode-label {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #aaa;
+  letter-spacing: 2px;
+}
+
+.scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-family: "Courier New", monospace;
+  font-size: 1.4rem;
+  font-weight: bold;
+  padding: 10px 20px;
+  width: 100%;
+}
+
+.score-side {
+  transition: color 0.2s;
+  color: #aaa;
+}
+
+.score--x.score--active {
+  color: var(--color-x);
+}
+
+.score--o.score--active {
+  color: var(--color-o);
+}
+
+.score-divider {
+  color: #ccc;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ctrl-btn {
+  padding: 10px 18px;
+  font-size: 0.9rem;
+  border: 2px solid #ccc;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.ctrl-btn:hover {
+  background: #f0f0f0;
+  border-color: #999;
+}
+
+.ctrl-btn--exit {
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.ctrl-btn--exit:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
