@@ -1,39 +1,72 @@
 .cell {
-  width: 100px;
-  height: 100px;
-  font-size: 2rem;
+  width: 110px;
+  height: 110px;
+  font-size: 2.8rem;
+  font-family: var(--font-main);
   font-weight: bold;
-  border: 2px solid var(--color-border);
+  background: var(--color-cell-bg);
+  border: 3px solid var(--color-cell-border);
   border-radius: 8px;
-  background-color: var(--color-cell-bg);
   cursor: pointer;
-  transition: var(--transition-highlight);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  transition: var(--transition-bounce);
 }
 
+.cell:hover {
+  transform: translateY(-5px) rotateX(10deg);
+  background: var(--color-cell-hover-bg);
+  border-color: var(--color-gold);
+  box-shadow: 0 0 15px rgba(247, 213, 29, 0.2), 4px 8px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* X mark */
 .cell--x {
   color: var(--color-x);
+  text-shadow: 0 0 15px var(--color-x);
+  background: var(--color-x-bg);
+  border-color: var(--color-x-border);
 }
 
+/* O mark */
 .cell--o {
   color: var(--color-o);
+  text-shadow: 0 0 15px var(--color-o);
+  background: var(--color-o-bg);
+  border-color: var(--color-o-border);
 }
 
+/* Winning cells — gold jackpot */
 .cell--winner {
-  background-color: var(--color-gold);
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 50%, var(--color-gold-dim) 100%);
+  color: #1e1e2e;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  border-color: #fff;
+  box-shadow:
+    0 0 20px var(--color-gold),
+    0 0 40px rgba(247, 213, 29, 0.4),
+    inset 0 0 10px rgba(255, 255, 255, 0.3);
+  transform: scale(1.08);
+  z-index: 5;
 }
 
+.cell--winner:hover {
+  transform: scale(1.08);
+}
+
+/* Warning cell — oldest mark about to vanish */
 .cell--warning {
-  background-color: var(--color-warning);
+  background: #2e1a1a;
+  border-color: var(--color-warning);
+  box-shadow:
+    0 0 10px rgba(255, 107, 107, 0.4),
+    4px 4px 0px rgba(0, 0, 0, 0.5);
+  animation: pulse-warning 1.2s ease-in-out infinite;
 }
 
-.cell:hover:not(:disabled) {
-  background-color: #f0f0f0;
-}
-
-.cell--winner:hover,
-.cell--warning:hover {
-  background-color: inherit;
+@keyframes pulse-warning {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.4), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+  50%       { box-shadow: 0 0 20px rgba(255, 107, 107, 0.7), 4px 4px 0px rgba(0, 0, 0, 0.5); }
 }

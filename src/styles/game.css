@@ -2,72 +2,101 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
+  gap: 24px;
+  animation: float 6s ease-in-out infinite;
 }
 
 .game-mode-label {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
+  font-family: var(--font-main);
   font-weight: bold;
-  color: #aaa;
-  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 4px;
+  text-transform: uppercase;
 }
 
+/* Scoreboard */
 .scoreboard {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  font-family: "Courier New", monospace;
+  gap: 20px;
+  font-family: var(--font-main);
   font-size: 1.4rem;
   font-weight: bold;
-  padding: 10px 20px;
+  padding: 12px 28px;
+  background: var(--color-cell-bg);
+  border: 2px solid var(--color-cell-border);
+  border-radius: 6px;
   width: 100%;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  letter-spacing: 2px;
 }
 
 .score-side {
-  transition: color 0.2s;
-  color: #aaa;
+  color: rgba(255, 255, 255, 0.3);
+  transition: color 0.2s, text-shadow 0.2s;
 }
 
 .score--x.score--active {
   color: var(--color-x);
+  text-shadow: 0 0 10px var(--color-x);
 }
 
 .score--o.score--active {
   color: var(--color-o);
+  text-shadow: 0 0 10px var(--color-o);
 }
 
 .score-divider {
-  color: #ccc;
+  color: var(--color-cell-border);
 }
 
+/* Controls */
 .controls {
   display: flex;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 12px;
+  margin-top: 4px;
 }
 
 .ctrl-btn {
-  padding: 10px 18px;
-  font-size: 0.9rem;
-  border: 2px solid #ccc;
+  padding: 12px 20px;
+  font-size: 0.85rem;
+  font-family: var(--font-main);
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: var(--color-cell-bg);
+  color: rgba(255, 255, 255, 0.7);
+  border: 2px solid var(--color-cell-border);
   border-radius: 6px;
-  background: white;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+  transition: var(--transition-bounce);
 }
 
 .ctrl-btn:hover {
-  background: #f0f0f0;
-  border-color: #999;
+  transform: translateY(-3px);
+  background: var(--color-cell-hover-bg);
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+  text-shadow: 0 0 8px var(--color-gold);
+  box-shadow: 0 0 12px rgba(247, 213, 29, 0.25), 3px 6px 0px rgba(0, 0, 0, 0.5);
 }
 
 .ctrl-btn--exit {
-  color: #ef4444;
-  border-color: #fca5a5;
+  color: rgba(239, 68, 68, 0.7);
+  border-color: rgba(239, 68, 68, 0.3);
 }
 
 .ctrl-btn--exit:hover {
-  background: #fef2f2;
-  border-color: #ef4444;
+  border-color: var(--color-x);
+  color: var(--color-x);
+  text-shadow: 0 0 8px var(--color-x);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25), 3px 6px 0px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-12px); }
 }
