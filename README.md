@@ -9,7 +9,7 @@ When a player wins, the board clears but the winning mark is carried over to the
 Scoring
 Scores persist across rounds until manually reset. Each win increments the winner's score by 1.
 
-Game Modes
 
+Game Modes:
 vs Computer — Play against an AI opponent that prioritizes winning, then blocking, then center, then a random available cell.
 2 Player — Two players share the same device and alternate turns.
