@@ -76,12 +76,31 @@
 
 /* Touch devices — swap hover for active press feedback */
 @media (hover: none) {
-  .cell:hover {
+  .cell:not(.cell--x):not(.cell--o):hover {
     transform: none;
     background: var(--color-cell-bg);
     border-color: var(--color-cell-border);
+    color: rgba(255, 255, 255, 0.7);
+    text-shadow: none;
     box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
   }
+
+  .cell:not(.cell--x):not(.cell--o):active {
+    transform: scale(0.95);
+    border-color: var(--color-gold);
+    box-shadow: 0 0 12px rgba(247, 213, 29, 0.3);
+  }
+
+  .cell--winner:hover,
+  .cell--winner:active {
+    transform: scale(1.08);
+  }
+
+  .cell--warning:hover {
+    background: #2e1a1a;
+    border-color: var(--color-warning);
+  }
+}
 
   .cell:active {
     transform: scale(0.95);
@@ -98,7 +117,6 @@
     background: #2e1a1a;
     border-color: var(--color-warning);
   }
-}
 
 /* Safety net for very small screens (320px) */
 @media (max-width: 340px) {
