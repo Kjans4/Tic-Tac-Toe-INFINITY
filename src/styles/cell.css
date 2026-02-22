@@ -65,15 +65,25 @@
 }
 
 /* Warning cell — oldest mark about to vanish */
-.cell--warning {
+/* Warning — X (red) */
+.cell--warning.cell--x {
   background: #2e1a1a;
-  border-color: var(--color-warning);
+  border-color: var(--color-x);
   box-shadow:
-    0 0 10px rgba(255, 107, 107, 0.4),
+    0 0 10px rgba(239, 68, 68, 0.4),
     4px 4px 0px rgba(0, 0, 0, 0.5);
-  animation: pulse-warning 1.2s ease-in-out infinite;
+  animation: pulse-warning-x 1.2s ease-in-out infinite;
 }
 
+/* Warning — O (blue) */
+.cell--warning.cell--o {
+  background: #1a2535;
+  border-color: var(--color-o);
+  box-shadow:
+    0 0 10px rgba(59, 130, 246, 0.4),
+    4px 4px 0px rgba(0, 0, 0, 0.5);
+  animation: pulse-warning-o 1.2s ease-in-out infinite;
+}
 /* Touch devices — swap hover for active press feedback */
 @media (hover: none) {
   .cell:not(.cell--x):not(.cell--o):hover {
@@ -96,38 +106,39 @@
     transform: scale(1.08);
   }
 
-  .cell--warning:hover {
+  /* YOUR NEW UPDATE GOES HERE: */
+  .cell--warning.cell--x:hover {
     background: #2e1a1a;
-    border-color: var(--color-warning);
+    border-color: var(--color-x);
+  }
+  
+  .cell--warning.cell--o:hover {
+    background: #1a2535;
+    border-color: var(--color-o);
   }
 }
 
-  .cell:active {
-    transform: scale(0.95);
-    border-color: var(--color-gold);
-    box-shadow: 0 0 12px rgba(247, 213, 29, 0.3);
-  }
+/* Move general active state and small screen fixes below the media block */
+.cell:active {
+  transform: scale(0.95);
+  border-color: var(--color-gold);
+  box-shadow: 0 0 12px rgba(247, 213, 29, 0.3);
+}
 
-  .cell--winner:hover,
-  .cell--winner:active {
-    transform: scale(1.08);
-  }
-
-  .cell--warning:hover {
-    background: #2e1a1a;
-    border-color: var(--color-warning);
-  }
-
-/* Safety net for very small screens (320px) */
 @media (max-width: 340px) {
   :root {
-    --cell-gap:  8px;
+    --cell-gap: 8px;
     --cell-size: calc((100vw - 56px) / 3);
     --cell-font: 1.8rem;
   }
 }
 
-@keyframes pulse-warning {
-  0%, 100% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.4), 4px 4px 0px rgba(0, 0, 0, 0.5); }
-  50%       { box-shadow: 0 0 22px rgba(255, 107, 107, 0.75), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+@keyframes pulse-warning-x {
+  0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+  50%       { box-shadow: 0 0 22px rgba(239, 68, 68, 0.75), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+}
+
+@keyframes pulse-warning-o {
+  0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+  50%       { box-shadow: 0 0 22px rgba(59, 130, 246, 0.75), 4px 4px 0px rgba(0, 0, 0, 0.5); }
 }
