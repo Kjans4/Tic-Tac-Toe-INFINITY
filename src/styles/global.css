@@ -7,28 +7,38 @@
 }
 
 :root {
-  --color-gold: #f7d51d;
-  --color-gold-dim: #b59a00;
-  --color-gold-light: #ffef8a;
-  --color-warning: #ff6b6b;
-  --color-x: #ef4444;
-  --color-x-bg: #351a1a;
-  --color-x-border: #ef4444;
-  --color-o: #3b82f6;
-  --color-o-bg: #1a2535;
-  --color-o-border: #3b82f6;
-  --color-bg-dark: #000000;
-  --color-bg-mid: #1e1e2e;
-  --color-cell-bg: #2a2d3e;
+  --color-gold:        #f7d51d;
+  --color-gold-dim:    #b59a00;
+  --color-gold-light:  #ffef8a;
+  --color-warning:     #ff6b6b;
+  --color-x:           #ef4444;
+  --color-x-bg:        #351a1a;
+  --color-x-border:    #ef4444;
+  --color-o:           #3b82f6;
+  --color-o-bg:        #1a2535;
+  --color-o-border:    #3b82f6;
+  --color-bg-dark:     #000000;
+  --color-bg-mid:      #1e1e2e;
+  --color-cell-bg:     #2a2d3e;
   --color-cell-border: #454962;
-  --color-cell-hover-bg: #3b3f58;
-  --font-main: 'Courier Prime', monospace;
+  --color-cell-hover:  #3b3f58;
+  --font-main:         'Courier Prime', monospace;
   --transition-bounce: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /*
+    Single source of truth for the board.
+    Everything in board.css and cell.css derives from these three.
+    clamp(minimum, fluid, maximum)
+  */
+  --cell-size: clamp(80px, 22vw, 110px);
+  --cell-gap:  clamp(8px, 2vw, 12px);
+  --cell-font: clamp(1.8rem, 5vw, 2.8rem);
 }
 
 body {
   background: radial-gradient(circle, var(--color-bg-mid) 0%, var(--color-bg-dark) 100%);
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -37,17 +47,17 @@ body {
   overflow: hidden;
 }
 
-/* CRT scanline overlay — applied globally via App wrapper */
 .app-wrapper {
   position: relative;
   width: 100%;
   max-width: 480px;
-  padding: 24px;
+  padding: clamp(16px, 5vw, 32px);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
+/* CRT scanline overlay */
 .app-wrapper::before {
   content: '';
   position: fixed;

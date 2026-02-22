@@ -1,7 +1,7 @@
 .cell {
-  width: 110px;
-  height: 110px;
-  font-size: 2.8rem;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  font-size: var(--cell-font);
   font-family: var(--font-main);
   font-weight: bold;
   background: var(--color-cell-bg);
@@ -13,11 +13,14 @@
   justify-content: center;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
   transition: var(--transition-bounce);
+  /* Prevent text selection on rapid taps */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .cell:hover {
   transform: translateY(-5px) rotateX(10deg);
-  background: var(--color-cell-hover-bg);
+  background: var(--color-cell-hover);
   border-color: var(--color-gold);
   box-shadow: 0 0 15px rgba(247, 213, 29, 0.2), 4px 8px 0px rgba(0, 0, 0, 0.5);
 }
@@ -40,7 +43,12 @@
 
 /* Winning cells — gold jackpot */
 .cell--winner {
-  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-light) 50%, var(--color-gold-dim) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-gold) 0%,
+    var(--color-gold-light) 50%,
+    var(--color-gold-dim) 100%
+  );
   color: #1e1e2e;
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
   border-color: #fff;
@@ -66,7 +74,42 @@
   animation: pulse-warning 1.2s ease-in-out infinite;
 }
 
+/* Touch devices — swap hover for active press feedback */
+@media (hover: none) {
+  .cell:hover {
+    transform: none;
+    background: var(--color-cell-bg);
+    border-color: var(--color-cell-border);
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  }
+
+  .cell:active {
+    transform: scale(0.95);
+    border-color: var(--color-gold);
+    box-shadow: 0 0 12px rgba(247, 213, 29, 0.3);
+  }
+
+  .cell--winner:hover,
+  .cell--winner:active {
+    transform: scale(1.08);
+  }
+
+  .cell--warning:hover {
+    background: #2e1a1a;
+    border-color: var(--color-warning);
+  }
+}
+
+/* Safety net for very small screens (320px and below) */
+@media (max-width: 340px) {
+  :root {
+    --cell-size: 88px;
+    --cell-gap:  6px;
+    --cell-font: 1.6rem;
+  }
+}
+
 @keyframes pulse-warning {
   0%, 100% { box-shadow: 0 0 10px rgba(255, 107, 107, 0.4), 4px 4px 0px rgba(0, 0, 0, 0.5); }
-  50%       { box-shadow: 0 0 20px rgba(255, 107, 107, 0.7), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+  50%       { box-shadow: 0 0 22px rgba(255, 107, 107, 0.75), 4px 4px 0px rgba(0, 0, 0, 0.5); }
 }

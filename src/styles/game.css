@@ -2,12 +2,13 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 24px;
+  gap: clamp(14px, 4vw, 24px);
+  width: 100%;
   animation: float 6s ease-in-out infinite;
 }
 
 .game-mode-label {
-  font-size: 0.75rem;
+  font-size: clamp(0.6rem, 2vw, 0.75rem);
   font-family: var(--font-main);
   font-weight: bold;
   color: rgba(255, 255, 255, 0.3);
@@ -20,11 +21,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: clamp(10px, 3vw, 20px);
   font-family: var(--font-main);
-  font-size: 1.4rem;
+  font-size: clamp(1rem, 4vw, 1.4rem);
   font-weight: bold;
-  padding: 12px 28px;
+  padding: clamp(8px, 2vw, 12px) clamp(14px, 4vw, 28px);
   background: var(--color-cell-bg);
   border: 2px solid var(--color-cell-border);
   border-radius: 6px;
@@ -55,13 +56,16 @@
 /* Controls */
 .controls {
   display: flex;
-  gap: 12px;
+  flex-wrap: wrap;          /* wraps to second row on narrow screens */
+  justify-content: center;
+  gap: clamp(6px, 2vw, 12px);
+  width: 100%;
   margin-top: 4px;
 }
 
 .ctrl-btn {
-  padding: 12px 20px;
-  font-size: 0.85rem;
+  padding: clamp(8px, 2.5vw, 12px) clamp(12px, 3.5vw, 20px);
+  font-size: clamp(0.7rem, 2.2vw, 0.85rem);
   font-family: var(--font-main);
   font-weight: bold;
   letter-spacing: 1px;
@@ -73,11 +77,12 @@
   cursor: pointer;
   box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
   transition: var(--transition-bounce);
+  white-space: nowrap;
 }
 
 .ctrl-btn:hover {
   transform: translateY(-3px);
-  background: var(--color-cell-hover-bg);
+  background: var(--color-cell-hover);
   border-color: var(--color-gold);
   color: var(--color-gold);
   text-shadow: 0 0 8px var(--color-gold);
@@ -94,6 +99,36 @@
   color: var(--color-x);
   text-shadow: 0 0 8px var(--color-x);
   box-shadow: 0 0 12px rgba(239, 68, 68, 0.25), 3px 6px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Touch devices */
+@media (hover: none) {
+  .ctrl-btn:hover {
+    transform: none;
+    background: var(--color-cell-bg);
+    border-color: var(--color-cell-border);
+    color: rgba(255, 255, 255, 0.7);
+    text-shadow: none;
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+  }
+
+  .ctrl-btn:active {
+    transform: translateY(2px);
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+  }
+
+  .ctrl-btn--exit:hover {
+    color: rgba(239, 68, 68, 0.7);
+    border-color: rgba(239, 68, 68, 0.3);
+    box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+  }
+
+  .ctrl-btn--exit:active {
+    border-color: var(--color-x);
+    color: var(--color-x);
+  }
 }
 
 @keyframes float {

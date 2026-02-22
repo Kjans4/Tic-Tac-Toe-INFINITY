@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 48px;
+  gap: clamp(28px, 8vw, 48px);
+  width: 100%;
   animation: float 6s ease-in-out infinite;
 }
 
@@ -14,33 +15,33 @@
 }
 
 .home-subtitle {
-  font-size: 1rem;
+  font-size: clamp(0.7rem, 2.5vw, 1rem);
   color: rgba(255, 255, 255, 0.5);
   letter-spacing: 4px;
   text-transform: uppercase;
 }
 
 .home-title {
-  font-size: 4rem;
+  font-size: clamp(2.4rem, 12vw, 4rem);
   font-weight: bold;
   color: var(--color-gold);
   text-shadow:
     0 0 10px var(--color-gold),
     0 0 30px rgba(247, 213, 29, 0.4),
     0 0 60px rgba(247, 213, 29, 0.15);
-  letter-spacing: 4px;
+  letter-spacing: clamp(2px, 1vw, 6px);
 }
 
 .home-buttons {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: clamp(10px, 3vw, 16px);
   width: 100%;
 }
 
 .home-btn {
-  padding: 16px 0;
-  font-size: 1rem;
+  padding: clamp(12px, 3vw, 16px) 0;
+  font-size: clamp(0.8rem, 2.5vw, 1rem);
   font-weight: bold;
   font-family: var(--font-main);
   letter-spacing: 2px;
@@ -52,15 +53,35 @@
   cursor: pointer;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
   transition: var(--transition-bounce);
+  /* Prevent text overflow on very small screens */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .home-btn:hover {
   transform: translateY(-4px);
-  background: var(--color-cell-hover-bg);
+  background: var(--color-cell-hover);
   border-color: var(--color-gold);
   color: var(--color-gold);
   text-shadow: 0 0 10px var(--color-gold);
   box-shadow: 0 0 15px rgba(247, 213, 29, 0.3), 4px 8px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Touch devices — remove hover lift to avoid sticky states */
+@media (hover: none) {
+  .home-btn:hover {
+    transform: none;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  }
+
+  .home-btn:active {
+    transform: translateY(2px);
+    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+    text-shadow: 0 0 10px var(--color-gold);
+  }
 }
 
 @keyframes float {
