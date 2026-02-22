@@ -100,12 +100,12 @@
   }
 }
 
-/* Safety net for very small screens (320px and below) */
+/* Safety net for very small screens (320px) */
 @media (max-width: 340px) {
   :root {
-    --cell-size: 88px;
-    --cell-gap:  6px;
-    --cell-font: 1.6rem;
+    --cell-gap:  8px;
+    --cell-size: calc((100vw - 56px) / 3);
+    --cell-font: 1.8rem;
   }
 }
 

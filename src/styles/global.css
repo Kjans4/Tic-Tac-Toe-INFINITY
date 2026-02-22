@@ -26,13 +26,16 @@
   --transition-bounce: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
   /*
-    Single source of truth for the board.
-    Everything in board.css and cell.css derives from these three.
-    clamp(minimum, fluid, maximum)
+    Board sizing strategy:
+    Container max-width is 480px with 32px padding on each side = 416px usable.
+    Board = 3 cells + 2 gaps. We want cells to fill that space.
+    --cell-gap is fixed at 10px.
+    --cell-size = (100vw - 2*padding - 2*gap) / 3, capped at 130px for desktop.
+    calc((100vw - 64px - 20px) / 3) = calc((100vw - 84px) / 3)
   */
-  --cell-size: clamp(80px, 22vw, 110px);
-  --cell-gap:  clamp(8px, 2vw, 12px);
-  --cell-font: clamp(1.8rem, 5vw, 2.8rem);
+  --cell-gap:  10px;
+  --cell-size: clamp(100px, calc((100vw - 84px) / 3), 130px);
+  --cell-font: clamp(2rem, 8vw, 3rem);
 }
 
 body {
@@ -51,7 +54,7 @@ body {
   position: relative;
   width: 100%;
   max-width: 480px;
-  padding: clamp(16px, 5vw, 32px);
+  padding: clamp(12px, 4vw, 32px);
   display: flex;
   flex-direction: column;
   align-items: center;

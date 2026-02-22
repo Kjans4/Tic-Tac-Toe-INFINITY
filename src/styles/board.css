@@ -1,7 +1,7 @@
 .board-grid {
   display: grid;
-  grid-template-columns: repeat(3, 110px);
-  grid-template-rows: repeat(3, 110px);
-  gap: 12px;
+  grid-template-columns: repeat(3, var(--cell-size));
+  grid-template-rows:    repeat(3, var(--cell-size));
+  gap: var(--cell-gap);
   perspective: 1000px;
 }
