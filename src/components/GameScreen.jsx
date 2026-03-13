@@ -28,7 +28,7 @@ export default function GameScreen({ vsComputer, onExit }) {
   const [scores, setScores] = useState({ X: 0, O: 0 });
 
   const totalScore = scores.X + scores.O;
-  const difficulty = getDifficulty(totalScore);
+  const difficulty = getDifficulty(scores.X);
 
   const timerRef = useRef(null);
 
@@ -79,7 +79,7 @@ export default function GameScreen({ vsComputer, onExit }) {
         current.board,
         current.movesX,
         current.movesO,
-        currentTotal
+        scores.X
       );
 
       if (moveKey) {
