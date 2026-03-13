@@ -39,7 +39,7 @@ export default function HomeScreen({ onStartGame }) {
                 you place a 4th mark, your oldest mark vanishes automatically.
               </p>
               <p className="how-to-rule-text">
-                A <span className="how-to-highlight how-to-highlight--pink">pink glow</span> warns
+                A <span className="how-to-highlight how-to-highlight--pink">red faint glow</span> warns
                 you which of your marks will disappear on your next turn.
               </p>
             </div>
