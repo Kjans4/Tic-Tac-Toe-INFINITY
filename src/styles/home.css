@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(28px, 8vw, 48px);
+  gap: clamp(24px, 6vw, 40px);
   width: 100%;
   animation: float 6s ease-in-out infinite;
 }
@@ -53,7 +53,6 @@
   cursor: pointer;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
   transition: var(--transition-bounce);
-  /* Prevent text overflow on very small screens */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -68,7 +67,156 @@
   box-shadow: 0 0 15px rgba(247, 213, 29, 0.3), 4px 8px 0px rgba(0, 0, 0, 0.5);
 }
 
-/* Touch devices — remove hover lift to avoid sticky states */
+/* How To Play */
+.how-to-play {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.how-to-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: clamp(10px, 2.5vw, 14px) clamp(14px, 3vw, 18px);
+  font-family: var(--font-main);
+  font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  background: var(--color-cell-bg);
+  border: 2px solid var(--color-cell-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-bounce);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  width: 100%;
+}
+
+.how-to-toggle:hover {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+  text-shadow: 0 0 8px rgba(247, 213, 29, 0.5);
+}
+
+.how-to-toggle--open {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+  box-shadow: 4px 0px 0px rgba(0, 0, 0, 0.5);
+}
+
+.how-to-arrow {
+  font-size: 0.7rem;
+  transition: transform 0.3s ease;
+}
+
+/* Collapsible panel */
+.how-to-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+  background: var(--color-cell-bg);
+  border: 2px solid transparent;
+  border-top: none;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.how-to-body--open {
+  grid-template-rows: 1fr;
+  border-color: var(--color-gold);
+  border-top: none;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+}
+
+/* Inner wrapper needed for grid-template-rows collapse trick */
+.how-to-content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  transition: padding 0.35s ease;
+}
+
+.how-to-body--open .how-to-content {
+  padding: clamp(14px, 3vw, 20px);
+  gap: clamp(12px, 3vw, 16px);
+}
+
+.how-to-rule {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.how-to-rule-title {
+  font-size: clamp(0.65rem, 2vw, 0.75rem);
+  font-weight: bold;
+  letter-spacing: 3px;
+  color: var(--color-gold);
+  text-shadow: 0 0 8px rgba(247, 213, 29, 0.4);
+}
+
+.how-to-rule-text {
+  font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+  letter-spacing: 0.5px;
+}
+
+.how-to-divider {
+  height: 1px;
+  background: var(--color-cell-border);
+  width: 100%;
+}
+
+/* Inline color highlights */
+.how-to-colors {
+  display: flex;
+  gap: clamp(10px, 3vw, 16px);
+  flex-wrap: wrap;
+}
+
+.how-to-highlight {
+  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  font-weight: bold;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  border: 1px solid;
+}
+
+.how-to-highlight--pink {
+  color: #ffb6c1;
+  border-color: #ffb6c1;
+  text-shadow: 0 0 6px rgba(255, 182, 193, 0.6);
+}
+
+.how-to-highlight--x {
+  color: var(--color-x);
+  border-color: var(--color-x);
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+.how-to-highlight--o {
+  color: var(--color-o);
+  border-color: var(--color-o);
+  text-shadow: 0 0 6px rgba(59, 130, 246, 0.5);
+}
+
+.how-to-highlight--gold {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  text-shadow: 0 0 6px rgba(247, 213, 29, 0.5);
+}
+
+/* Touch devices */
 @media (hover: none) {
   .home-btn:hover {
     transform: none;
@@ -81,6 +229,17 @@
     border-color: var(--color-gold);
     color: var(--color-gold);
     text-shadow: 0 0 10px var(--color-gold);
+  }
+
+  .how-to-toggle:hover {
+    border-color: var(--color-cell-border);
+    color: rgba(255, 255, 255, 0.5);
+    text-shadow: none;
+  }
+
+  .how-to-toggle:active {
+    border-color: var(--color-gold);
+    color: var(--color-gold);
   }
 }
 
