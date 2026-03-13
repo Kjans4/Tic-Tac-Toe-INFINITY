@@ -47,7 +47,8 @@ body {
   justify-content: center;
   font-family: var(--font-main);
   color: #fff;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .app-wrapper {
@@ -58,6 +59,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin: auto;
+  min-height: 100dvh;
+  justify-content: center;
 }
 
 /* CRT scanline overlay */
