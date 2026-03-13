@@ -1,55 +1,112 @@
 import { WIN_CONDITIONS, coordKey, appendMove } from "./gameLogic";
 
-/**
- * Scans the board for a "threat" or "opportunity."
- * A winning move exists if a player has 2 marks in a row and the 3rd spot is empty.
- * @param {Object} board - The current state of the 3x3 grid.
- * @param {string} symbol - The player to check for ("X" or "O").
- * @returns {string|null} The coordinate key (e.g., "1,2") to complete the line, or null.
- */
+// --- Difficulty Thresholds ---
+export function getDifficulty(totalScore) {
+  if (totalScore >= 12) return "hard";
+  if (totalScore >= 6)  return "medium";
+  return "easy";
+}
+
+// --- Shared Helpers ---
+function getEmptyCells(board) {
+  return Object.entries(board)
+    .filter(([, v]) => v === "")
+    .map(([k]) => k);
+}
+
 function findWinningMove(board, symbol) {
   for (const combo of WIN_CONDITIONS) {
-    // Convert coordinate pairs into board keys (e.g., [0,0] -> "0,0")
-    const keys = combo.map(([r, c]) => coordKey(r, c));
-    // Get the actual values at those positions ("", "X", or "O")
-    const values = keys.map((k) => board[k]);
-
-    // Check if the player has exactly 2 marks and 1 empty space in this combo
-    if (values.filter((v) => v === symbol).length === 2 &&
-        values.filter((v) => v === "").length === 1) {
-      
-      // Find the index of that empty space and return its coordinate key
-      const emptyIndex = values.indexOf("");
-      return keys[emptyIndex];
+    const keys  = combo.map(([r, c]) => coordKey(r, c));
+    const vals  = keys.map((k) => board[k]);
+    if (vals.filter((v) => v === symbol).length === 2 &&
+        vals.filter((v) => v === "").length === 1) {
+      return keys[vals.indexOf("")];
     }
   }
   return null;
 }
 
-/**
- * Determines the AI's next move based on a priority hierarchy.
- * Priority: 1. Win > 2. Block > 3. Center > 4. Random
- */
-export function getAIMove(board, movesX, movesO) {
-  // --- STRATEGY 1: WIN ---
-  // If the AI ("O") can win in one move, take it.
-  let move = findWinningMove(board, "O");
-  if (move) return move;
+// Simulate placing a move including the rolling vanish side effect.
+// Returns the resulting board without mutating the original.
+function simulateMove(board, queue, symbol, targetKey) {
+  const newBoard = { ...board };
+  const newQueue = [...queue, targetKey];
 
-  // --- STRATEGY 2: BLOCK ---
-  // If the opponent ("X") is about to win, block that spot.
-  move = findWinningMove(board, "X");
-  if (move) return move;
+  if (newQueue.length > 3) {
+    newBoard[newQueue[0]] = ""; // oldest mark vanishes
+    newQueue.shift();
+  }
 
-  // --- STRATEGY 3: CENTER CONTROL ---
-  // The center square (1,1) is statistically the strongest position.
+  newBoard[targetKey] = symbol;
+  return { newBoard, newQueue };
+}
+
+// --- Easy AI: pure random ---
+function easyMove(board) {
+  const empty = getEmptyCells(board);
+  return empty.length ? empty[Math.floor(Math.random() * empty.length)] : null;
+}
+
+// --- Medium AI: win → block → center → random (current behavior) ---
+function mediumMove(board) {
+  return (
+    findWinningMove(board, "O") ||
+    findWinningMove(board, "X") ||
+    (board[coordKey(1, 1)] === "" ? coordKey(1, 1) : null) ||
+    easyMove(board)
+  );
+}
+
+// --- Hard AI: rolling-aware ---
+function hardMove(board, movesO, movesX) {
+  const empty = getEmptyCells(board);
+
+  // 1. Can AI win this move? (simulate the vanish first)
+  for (const key of empty) {
+    const { newBoard } = simulateMove(board, movesO, "O", key);
+    if (findWinningMove(newBoard, "O") !== null ||
+        checkImmediateWin(newBoard, "O")) {
+      return key;
+    }
+  }
+
+  // 2. Can opponent win on their next move? Block it.
+  for (const key of empty) {
+    const { newBoard, newQueue } = simulateMove(board, movesX, "X", key);
+    if (checkImmediateWin(newBoard, "X")) {
+      return key;
+    }
+  }
+
+  // 3. Can AI set up a guaranteed win next turn?
+  for (const key of empty) {
+    const { newBoard } = simulateMove(board, movesO, "O", key);
+    if (findWinningMove(newBoard, "O")) {
+      return key;
+    }
+  }
+
+  // 4. Center → strategic corners → random
   if (board[coordKey(1, 1)] === "") return coordKey(1, 1);
 
-  // --- STRATEGY 4: RANDOM ---
-  // If no immediate threats/wins/center, pick any available empty square.
-  const empty = Object.entries(board).filter(([, v]) => v === "");
-  if (empty.length === 0) return null; // Board is full (unlikely in "Infinite" mode)
-  
-  // Pick a random index from the list of empty cells
-  return empty[Math.floor(Math.random() * empty.length)][0];
+  const corners = ["0,0", "0,2", "2,0", "2,2"].filter((k) => board[k] === "");
+  if (corners.length) return corners[Math.floor(Math.random() * corners.length)];
+
+  return easyMove(board);
+}
+
+// Check if a player already has 3 in a row on the given board
+function checkImmediateWin(board, symbol) {
+  return WIN_CONDITIONS.some((combo) =>
+    combo.every(([r, c]) => board[coordKey(r, c)] === symbol)
+  );
+}
+
+// --- Main Export ---
+export function getAIMove(board, movesX, movesO, totalScore) {
+  const difficulty = getDifficulty(totalScore);
+
+  if (difficulty === "easy")   return easyMove(board);
+  if (difficulty === "medium") return mediumMove(board);
+  return hardMove(board, movesO, movesX);
 }

@@ -135,3 +135,35 @@
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-12px); }
 }
+
+.difficulty-badge {
+  font-family: var(--font-main);
+  font-size: clamp(0.6rem, 2vw, 0.7rem);
+  font-weight: bold;
+  letter-spacing: 3px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid;
+  margin-top: -10px;
+}
+
+.difficulty--easy {
+  color: #4ade80;
+  border-color: #4ade80;
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
+}
+
+.difficulty--medium {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  text-shadow: 0 0 8px rgba(247, 213, 29, 0.6);
+  box-shadow: 0 0 8px rgba(247, 213, 29, 0.2);
+}
+
+.difficulty--hard {
+  color: var(--color-x);
+  border-color: var(--color-x);
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
+}

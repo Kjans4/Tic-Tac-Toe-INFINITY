@@ -6,13 +6,13 @@ import {
   getWarningCoord,
   coordKey,
 } from "../logic/gameLogic";
-import { getAIMove } from "../logic/aiEngine";
+// 1. Updated Import
+import { getAIMove, getDifficulty } from "../logic/aiEngine";
 import ScoreBoard from "./ScoreBoard";
 import Board from "./Board";
 import Controls from "./Controls";
 import "../styles/game.css";
 
-// 1. Added pending fields to the state to track win data for the effect
 const INITIAL_STATE = () => ({
   board: buildInitialBoard(),
   movesX: [],
@@ -20,13 +20,18 @@ const INITIAL_STATE = () => ({
   currentPlayer: "X",
   phase: "playing",
   winningCombo: null,
-  pendingWinner: null, // New
-  pendingCarry: null,  // New
+  pendingWinner: null,
+  pendingCarry: null,
 });
 
 export default function GameScreen({ vsComputer, onExit }) {
   const [gameState, setGameState] = useState(INITIAL_STATE);
   const [scores, setScores] = useState({ X: 0, O: 0 });
+  
+  // 2. Derive totalScore and difficulty
+  const totalScore = scores.X + scores.O;
+  const difficulty = getDifficulty(totalScore);
+
   const timerRef = useRef(null);
 
   const warningCoord = (() => {
@@ -34,22 +39,19 @@ export default function GameScreen({ vsComputer, onExit }) {
     return getWarningCoord(q);
   })();
 
-  // 2. NEW EFFECT: Handles the reset/loop logic after a win
   useEffect(() => {
     if (gameState.phase !== "victory") return;
 
     const { pendingWinner, pendingCarry } = gameState;
     
-    // Update scores
     setScores((s) => ({ ...s, [pendingWinner]: s[pendingWinner] + 1 }));
 
-    // Schedule the board reset
     timerRef.current = setTimeout(() => {
       triggerCarryover(pendingCarry[0], pendingCarry[1], pendingWinner);
     }, 1500);
 
     return () => clearTimeout(timerRef.current);
-  }, [gameState.phase]); // Only runs when phase changes to "victory"
+  }, [gameState.phase]);
 
   // AI trigger effect
   useEffect(() => {
@@ -59,7 +61,14 @@ export default function GameScreen({ vsComputer, onExit }) {
       gameState.phase === "playing"
     ) {
       timerRef.current = setTimeout(() => {
-        const moveKey = getAIMove(gameState.board, gameState.movesX, gameState.movesO);
+        // 3. Pass totalScore into getAIMove
+        const moveKey = getAIMove(
+          gameState.board, 
+          gameState.movesX, 
+          gameState.movesO, 
+          totalScore
+        );
+        
         if (moveKey) {
           const [r, c] = moveKey.split(",").map(Number);
           processMove(r, c);
@@ -67,7 +76,7 @@ export default function GameScreen({ vsComputer, onExit }) {
       }, 400);
     }
     return () => clearTimeout(timerRef.current);
-  }, [gameState.currentPlayer, gameState.phase]);
+  }, [gameState.currentPlayer, gameState.phase, vsComputer, totalScore]); // Added vsComputer and totalScore to deps for safety
 
   function handleCellClick(r, c) {
     if (gameState.phase !== "playing") return;
@@ -87,7 +96,6 @@ export default function GameScreen({ vsComputer, onExit }) {
       const winCombo = checkWinner(newBoard, prev.currentPlayer);
 
       if (winCombo) {
-        // Just update state here; let the useEffect handle the timer/score
         return {
           ...prev,
           board: newBoard,
@@ -150,6 +158,14 @@ export default function GameScreen({ vsComputer, onExit }) {
   return (
     <div className="game-container">
       <p className="game-mode-label">INFINITY MODE</p>
+      
+      {/* 4. Updated: Difficulty badge now only shows in vsComputer mode */}
+      {vsComputer && (
+        <span className={`difficulty-badge difficulty--${difficulty}`}>
+          {difficulty.toUpperCase()}
+        </span>
+      )}
+
       <ScoreBoard scores={scores} currentPlayer={gameState.currentPlayer} />
       <Board
         board={gameState.board}
