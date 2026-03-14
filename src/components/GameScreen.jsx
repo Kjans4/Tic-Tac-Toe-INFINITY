@@ -47,7 +47,7 @@ export default function GameScreen({ vsComputer, onExit }) {
   // Shuffle bags — one per pool, persist across rounds
   const bags = useRef({
     xWin:      createShuffleBag(POOLS.xWin),
-    oWin:      createShuffleBag(POOLS.oWin),
+    sharedWin:  createShuffleBag(POOLS.sharedWin),
     aiWin:     createShuffleBag(POOLS.aiWin),
     flavorWin:  createShuffleBag(POOLS.flavorWin),
     flavorLose: createShuffleBag(POOLS.flavorLose),
@@ -71,19 +71,16 @@ export default function GameScreen({ vsComputer, onExit }) {
     // Update scores
     setScores((s) => {
       const newScores = { ...s, [pendingWinner]: s[pendingWinner] + 1 };
-
-      // Pick celebration texts based on who won and game mode
       const isAIWin = vsComputer && pendingWinner === "O";
-      const is2PlayerOWin = !vsComputer && pendingWinner === "O";
 
-      let mainText;
-      if (isAIWin) {
-        mainText = bags.current.aiWin.pick();
-      } else if (pendingWinner === "X") {
-        mainText = bags.current.xWin.pick();
-      } else {
-        mainText = bags.current.oWin.pick();
-      }
+       let mainText;
+  if (isAIWin) {
+    mainText = bags.current.aiWin.pick();
+  } else if (vsComputer && pendingWinner === "X") {
+    mainText = bags.current.xWin.pick();
+  } else {
+    mainText = `${pendingWinner}  —  ${bags.current.sharedWin.pick()}`;
+  }
 
       const flavorText = isAIWin
         ? bags.current.flavorLose.pick()
@@ -92,7 +89,6 @@ export default function GameScreen({ vsComputer, onExit }) {
       setCelebration({
         visible: true,
         mainText,
-        scores: newScores,  // use updated scores for display
         flavorText,
         isLoss: isAIWin,
       });
@@ -103,7 +99,7 @@ export default function GameScreen({ vsComputer, onExit }) {
     timerRef.current = setTimeout(() => {
       setCelebration((prev) => ({ ...prev, visible: false }));
       triggerCarryover(pendingCarry[0], pendingCarry[1], pendingWinner);
-    }, 1500);
+    }, 1800);
 
     return () => clearTimeout(timerRef.current);
   }, [gameState.phase]);
@@ -264,7 +260,6 @@ export default function GameScreen({ vsComputer, onExit }) {
       <CelebrationOverlay
         visible={celebration.visible}
         mainText={celebration.mainText}
-        scores={celebration.scores || scores}
         flavorText={celebration.flavorText}
         isLoss={celebration.isLoss}
       />

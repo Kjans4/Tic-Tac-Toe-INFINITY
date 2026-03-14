@@ -1,6 +1,11 @@
 import "../styles/celebration.css";
 
-export default function CelebrationOverlay({ visible, mainText, scores, flavorText, isLoss }) {
+export default function CelebrationOverlay({
+  visible,
+  mainText,
+  flavorText,
+  isLoss,
+}) {
   if (!visible) return null;
 
   return (
@@ -8,9 +13,6 @@ export default function CelebrationOverlay({ visible, mainText, scores, flavorTe
       <div className="celebration-content">
         <p className={`celebration-main ${isLoss ? "celebration-main--loss" : ""}`}>
           {mainText}
-        </p>
-        <p className="celebration-score">
-          X: {scores.X}&nbsp;&nbsp;|&nbsp;&nbsp;O: {scores.O}
         </p>
         <p className="celebration-flavor">{flavorText}</p>
       </div>

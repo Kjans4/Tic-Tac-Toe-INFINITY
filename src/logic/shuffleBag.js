@@ -1,4 +1,3 @@
-// Shuffle an array in place using Fisher-Yates
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -7,12 +6,8 @@ function shuffle(arr) {
   return arr;
 }
 
-// Creates a shuffle bag from a pool of texts.
-// Picks randomly without repeating until all have shown,
-// then refills and reshuffles automatically.
 export function createShuffleBag(pool) {
   let bag = shuffle([...pool]);
-
   return {
     pick() {
       if (bag.length === 0) bag = shuffle([...pool]);
@@ -23,6 +18,7 @@ export function createShuffleBag(pool) {
 
 // --- Text Pools ---
 
+// vs Computer only
 export const POOLS = {
   xWin: [
     "FLAWLESS",
@@ -31,13 +27,6 @@ export const POOLS = {
     "ROUND CLAIMED",
     "LOCKED IN",
   ],
-  oWin: [
-    "DOMINANT",
-    "CALCULATED",
-    "PRECISION PLAY",
-    "UNSTOPPABLE",
-    "ZERO DOUBT",
-  ],
   aiWin: [
     "ELIMINATED",
     "OVERWRITTEN",
@@ -45,6 +34,22 @@ export const POOLS = {
     "ERASED",
     "SYSTEM WINS",
   ],
+
+  // 2 Player — one shared pool, winner symbol prefixed dynamically
+  sharedWin: [
+    "FLAWLESS",
+    "INFINITY ACHIEVED",
+    "MARK SECURED",
+    "ROUND CLAIMED",
+    "LOCKED IN",
+    "DOMINANT",
+    "CALCULATED",
+    "PRECISION PLAY",
+    "UNSTOPPABLE",
+    "ZERO DOUBT",
+  ],
+
+  // Flavor — win
   flavorWin: [
     "CARRY THE MARK",
     "THE BOARD RESETS",
@@ -52,6 +57,8 @@ export const POOLS = {
     "THE CYCLE CONTINUES",
     "INFINITY ROLLS ON",
   ],
+
+  // Flavor — AI wins
   flavorLose: [
     "THE MACHINE ADVANCES",
     "RESISTANCE FAILED",
