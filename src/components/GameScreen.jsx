@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   buildInitialBoard,
   recordMove,
@@ -21,6 +21,8 @@ const INITIAL_STATE = () => ({
   winningCombo: null,
   pendingWinner: null,
   pendingCarry: null,
+  vanishedCoord: null,  // coord currently playing vanish animation
+  newCoord: null,       // coord currently playing pop-in animation
 });
 
 export default function GameScreen({ vsComputer, onExit }) {
@@ -31,10 +33,10 @@ export default function GameScreen({ vsComputer, onExit }) {
   const difficulty = getDifficulty(scores.X);
 
   const timerRef = useRef(null);
-
-  // Keep a ref to latest gameState so setTimeout callbacks
-  // never read stale closures
+  const vanishTimerRef = useRef(null);
+  const newCoordTimerRef = useRef(null);
   const gameStateRef = useRef(gameState);
+
   useEffect(() => {
     gameStateRef.current = gameState;
   }, [gameState]);
@@ -44,7 +46,7 @@ export default function GameScreen({ vsComputer, onExit }) {
     return getWarningCoord(q);
   })();
 
-  // Victory effect — score + carryover
+  // Victory effect
   useEffect(() => {
     if (gameState.phase !== "victory") return;
 
@@ -59,21 +61,15 @@ export default function GameScreen({ vsComputer, onExit }) {
     return () => clearTimeout(timerRef.current);
   }, [gameState.phase]);
 
-  // AI trigger effect — removed totalScore from deps to prevent
-  // re-firing when score updates mid-round
+  // AI trigger effect
   useEffect(() => {
     if (!vsComputer) return;
     if (gameState.currentPlayer !== "O") return;
     if (gameState.phase !== "playing") return;
 
     timerRef.current = setTimeout(() => {
-      // Read from ref so we always get the latest state
       const current = gameStateRef.current;
       if (current.phase !== "playing" || current.currentPlayer !== "O") return;
-
-      const currentTotal = current.pendingWinner
-        ? scores.X + scores.O
-        : totalScore;
 
       const moveKey = getAIMove(
         current.board,
@@ -89,8 +85,6 @@ export default function GameScreen({ vsComputer, onExit }) {
     }, 400);
 
     return () => clearTimeout(timerRef.current);
-  // totalScore deliberately excluded — we don't want AI re-triggering
-  // just because the score changed
   }, [gameState.currentPlayer, gameState.phase, vsComputer]);
 
   function handleCellClick(r, c) {
@@ -104,11 +98,27 @@ export default function GameScreen({ vsComputer, onExit }) {
     setGameState((prev) => {
       if (prev.phase !== "playing") return prev;
 
-      const { newBoard, newMovesX, newMovesO } = recordMove(
+      const { newBoard, newMovesX, newMovesO, vanished } = recordMove(
         prev.board, prev.movesX, prev.movesO, prev.currentPlayer, r, c
       );
 
+      const placedKey = coordKey(r, c);
       const winCombo = checkWinner(newBoard, prev.currentPlayer);
+
+      // If a mark vanished, show vanish animation briefly then clear it
+      if (vanished) {
+        // Clear any previous vanish timer
+        clearTimeout(vanishTimerRef.current);
+        vanishTimerRef.current = setTimeout(() => {
+          setGameState((s) => ({ ...s, vanishedCoord: null }));
+        }, 250); // matches vanish-out animation duration
+      }
+
+      // Clear pop-in after animation completes
+      clearTimeout(newCoordTimerRef.current);
+      newCoordTimerRef.current = setTimeout(() => {
+        setGameState((s) => ({ ...s, newCoord: null }));
+      }, 300); // matches pop-in animation duration
 
       if (winCombo) {
         return {
@@ -120,6 +130,8 @@ export default function GameScreen({ vsComputer, onExit }) {
           phase: "victory",
           pendingWinner: prev.currentPlayer,
           pendingCarry: [r, c],
+          vanishedCoord: vanished || null,
+          newCoord: placedKey,
         };
       }
 
@@ -131,6 +143,8 @@ export default function GameScreen({ vsComputer, onExit }) {
         winningCombo: null,
         phase: "playing",
         currentPlayer: prev.currentPlayer === "X" ? "O" : "X",
+        vanishedCoord: vanished || null,
+        newCoord: placedKey,
       };
     });
   }
@@ -153,11 +167,15 @@ export default function GameScreen({ vsComputer, onExit }) {
       winningCombo: null,
       pendingWinner: null,
       pendingCarry: null,
+      vanishedCoord: null,
+      newCoord: key, // carryover mark also pops in
     });
   }
 
   function handleAgain() {
     clearTimeout(timerRef.current);
+    clearTimeout(vanishTimerRef.current);
+    clearTimeout(newCoordTimerRef.current);
     setGameState(INITIAL_STATE());
   }
 
@@ -167,6 +185,8 @@ export default function GameScreen({ vsComputer, onExit }) {
 
   function handleExit() {
     clearTimeout(timerRef.current);
+    clearTimeout(vanishTimerRef.current);
+    clearTimeout(newCoordTimerRef.current);
     onExit();
   }
 
@@ -185,6 +205,8 @@ export default function GameScreen({ vsComputer, onExit }) {
         board={gameState.board}
         winningCombo={gameState.winningCombo}
         warningCoord={warningCoord}
+        vanishedCoord={gameState.vanishedCoord}
+        newCoord={gameState.newCoord}
         onCellClick={handleCellClick}
       />
       <Controls

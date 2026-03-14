@@ -1,10 +1,18 @@
 import Cell from "./Cell";
 import "../styles/board.css";
 
-export default function Board({ board, winningCombo, warningCoord, onCellClick }) {
+export default function Board({
+  board,
+  winningCombo,
+  warningCoord,
+  vanishedCoord,
+  newCoord,
+  onCellClick,
+}) {
   function getHighlight(key) {
     if (winningCombo && winningCombo.includes(key)) return "winner";
-    if (warningCoord === key) return "warning";
+    if (vanishedCoord === key) return "vanish";
+    if (warningCoord === key)  return "warning";
     return null;
   }
 
@@ -18,6 +26,7 @@ export default function Board({ board, winningCombo, warningCoord, onCellClick }
               key={key}
               value={board[key]}
               highlight={getHighlight(key)}
+              isNew={newCoord === key}
               onClick={() => onCellClick(r, c)}
             />
           );

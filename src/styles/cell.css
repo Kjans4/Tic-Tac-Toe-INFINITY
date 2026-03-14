@@ -12,8 +12,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
-  transition: var(--transition-bounce);
-  /* Prevent text selection on rapid taps */
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
   user-select: none;
   -webkit-user-select: none;
 }
@@ -41,6 +40,29 @@
   border-color: var(--color-o-border);
 }
 
+/* Pop-in on placement */
+.cell--placed {
+  animation: pop-in 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.5) forwards;
+}
+
+@keyframes pop-in {
+  0%   { transform: scale(0) rotate(-8deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotate(3deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+/* Vanish animation */
+.cell--vanish {
+  animation: vanish-out 0.22s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes vanish-out {
+  0%   { transform: scale(1); opacity: 1; filter: brightness(1); }
+  40%  { transform: scale(1.1); opacity: 0.8; filter: brightness(2); }
+  100% { transform: scale(0); opacity: 0; filter: brightness(0); }
+}
+
 /* Winning cells — gold jackpot */
 .cell--winner {
   background: linear-gradient(
@@ -58,13 +80,19 @@
     inset 0 0 10px rgba(255, 255, 255, 0.3);
   transform: scale(1.08);
   z-index: 5;
+  animation: winner-pulse 0.4s ease-out forwards;
+}
+
+@keyframes winner-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.15); }
+  100% { transform: scale(1.08); }
 }
 
 .cell--winner:hover {
   transform: scale(1.08);
 }
 
-/* Warning cell — oldest mark about to vanish */
 /* Warning — X (red) */
 .cell--warning.cell--x {
   background: #2e1a1a;
@@ -84,7 +112,18 @@
     4px 4px 0px rgba(0, 0, 0, 0.5);
   animation: pulse-warning-o 1.2s ease-in-out infinite;
 }
-/* Touch devices — swap hover for active press feedback */
+
+@keyframes pulse-warning-x {
+  0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+  50%       { box-shadow: 0 0 22px rgba(239, 68, 68, 0.75), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+}
+
+@keyframes pulse-warning-o {
+  0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+  50%       { box-shadow: 0 0 22px rgba(59, 130, 246, 0.75), 4px 4px 0px rgba(0, 0, 0, 0.5); }
+}
+
+/* Touch devices */
 @media (hover: none) {
   .cell:not(.cell--x):not(.cell--o):hover {
     transform: none;
@@ -106,39 +145,15 @@
     transform: scale(1.08);
   }
 
-  /* YOUR NEW UPDATE GOES HERE: */
-  .cell--warning.cell--x:hover {
-    background: #2e1a1a;
-    border-color: var(--color-x);
-  }
-  
-  .cell--warning.cell--o:hover {
-    background: #1a2535;
-    border-color: var(--color-o);
-  }
+  .cell--warning.cell--x:hover { background: #2e1a1a; border-color: var(--color-x); }
+  .cell--warning.cell--o:hover { background: #1a2535; border-color: var(--color-o); }
 }
 
-/* Move general active state and small screen fixes below the media block */
-.cell:active {
-  transform: scale(0.95);
-  border-color: var(--color-gold);
-  box-shadow: 0 0 12px rgba(247, 213, 29, 0.3);
-}
-
+/* Safety net for very small screens */
 @media (max-width: 340px) {
   :root {
-    --cell-gap: 8px;
+    --cell-gap:  8px;
     --cell-size: calc((100vw - 56px) / 3);
     --cell-font: 1.8rem;
   }
-}
-
-@keyframes pulse-warning-x {
-  0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.4), 4px 4px 0px rgba(0, 0, 0, 0.5); }
-  50%       { box-shadow: 0 0 22px rgba(239, 68, 68, 0.75), 4px 4px 0px rgba(0, 0, 0, 0.5); }
-}
-
-@keyframes pulse-warning-o {
-  0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.4), 4px 4px 0px rgba(0, 0, 0, 0.5); }
-  50%       { box-shadow: 0 0 22px rgba(59, 130, 246, 0.75), 4px 4px 0px rgba(0, 0, 0, 0.5); }
 }
