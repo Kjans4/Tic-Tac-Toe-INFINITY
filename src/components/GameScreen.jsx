@@ -7,9 +7,11 @@ import {
   coordKey,
 } from "../logic/gameLogic";
 import { getAIMove, getDifficulty } from "../logic/aiEngine";
+import { createShuffleBag, POOLS } from "../logic/shuffleBag";
 import ScoreBoard from "./ScoreBoard";
 import Board from "./Board";
 import Controls from "./Controls";
+import CelebrationOverlay from "./CelebrationOverlay";
 import "../styles/game.css";
 
 const INITIAL_STATE = () => ({
@@ -21,21 +23,35 @@ const INITIAL_STATE = () => ({
   winningCombo: null,
   pendingWinner: null,
   pendingCarry: null,
-  vanishedCoord: null,  // coord currently playing vanish animation
-  newCoord: null,       // coord currently playing pop-in animation
+  vanishedCoord: null,
+  newCoord: null,
 });
 
 export default function GameScreen({ vsComputer, onExit }) {
   const [gameState, setGameState] = useState(INITIAL_STATE);
   const [scores, setScores] = useState({ X: 0, O: 0 });
+  const [celebration, setCelebration] = useState({
+    visible: false,
+    mainText: "",
+    flavorText: "",
+    isLoss: false,
+  });
 
-  const totalScore = scores.X + scores.O;
   const difficulty = getDifficulty(scores.X);
 
   const timerRef = useRef(null);
   const vanishTimerRef = useRef(null);
   const newCoordTimerRef = useRef(null);
   const gameStateRef = useRef(gameState);
+
+  // Shuffle bags — one per pool, persist across rounds
+  const bags = useRef({
+    xWin:      createShuffleBag(POOLS.xWin),
+    oWin:      createShuffleBag(POOLS.oWin),
+    aiWin:     createShuffleBag(POOLS.aiWin),
+    flavorWin:  createShuffleBag(POOLS.flavorWin),
+    flavorLose: createShuffleBag(POOLS.flavorLose),
+  });
 
   useEffect(() => {
     gameStateRef.current = gameState;
@@ -52,9 +68,40 @@ export default function GameScreen({ vsComputer, onExit }) {
 
     const { pendingWinner, pendingCarry } = gameState;
 
-    setScores((s) => ({ ...s, [pendingWinner]: s[pendingWinner] + 1 }));
+    // Update scores
+    setScores((s) => {
+      const newScores = { ...s, [pendingWinner]: s[pendingWinner] + 1 };
+
+      // Pick celebration texts based on who won and game mode
+      const isAIWin = vsComputer && pendingWinner === "O";
+      const is2PlayerOWin = !vsComputer && pendingWinner === "O";
+
+      let mainText;
+      if (isAIWin) {
+        mainText = bags.current.aiWin.pick();
+      } else if (pendingWinner === "X") {
+        mainText = bags.current.xWin.pick();
+      } else {
+        mainText = bags.current.oWin.pick();
+      }
+
+      const flavorText = isAIWin
+        ? bags.current.flavorLose.pick()
+        : bags.current.flavorWin.pick();
+
+      setCelebration({
+        visible: true,
+        mainText,
+        scores: newScores,  // use updated scores for display
+        flavorText,
+        isLoss: isAIWin,
+      });
+
+      return newScores;
+    });
 
     timerRef.current = setTimeout(() => {
+      setCelebration((prev) => ({ ...prev, visible: false }));
       triggerCarryover(pendingCarry[0], pendingCarry[1], pendingWinner);
     }, 1500);
 
@@ -105,20 +152,17 @@ export default function GameScreen({ vsComputer, onExit }) {
       const placedKey = coordKey(r, c);
       const winCombo = checkWinner(newBoard, prev.currentPlayer);
 
-      // If a mark vanished, show vanish animation briefly then clear it
       if (vanished) {
-        // Clear any previous vanish timer
         clearTimeout(vanishTimerRef.current);
         vanishTimerRef.current = setTimeout(() => {
           setGameState((s) => ({ ...s, vanishedCoord: null }));
-        }, 250); // matches vanish-out animation duration
+        }, 250);
       }
 
-      // Clear pop-in after animation completes
       clearTimeout(newCoordTimerRef.current);
       newCoordTimerRef.current = setTimeout(() => {
         setGameState((s) => ({ ...s, newCoord: null }));
-      }, 300); // matches pop-in animation duration
+      }, 300);
 
       if (winCombo) {
         return {
@@ -168,7 +212,7 @@ export default function GameScreen({ vsComputer, onExit }) {
       pendingWinner: null,
       pendingCarry: null,
       vanishedCoord: null,
-      newCoord: key, // carryover mark also pops in
+      newCoord: key,
     });
   }
 
@@ -176,6 +220,7 @@ export default function GameScreen({ vsComputer, onExit }) {
     clearTimeout(timerRef.current);
     clearTimeout(vanishTimerRef.current);
     clearTimeout(newCoordTimerRef.current);
+    setCelebration({ visible: false, mainText: "", flavorText: "", isLoss: false });
     setGameState(INITIAL_STATE());
   }
 
@@ -187,6 +232,7 @@ export default function GameScreen({ vsComputer, onExit }) {
     clearTimeout(timerRef.current);
     clearTimeout(vanishTimerRef.current);
     clearTimeout(newCoordTimerRef.current);
+    setCelebration({ visible: false, mainText: "", flavorText: "", isLoss: false });
     onExit();
   }
 
@@ -213,6 +259,14 @@ export default function GameScreen({ vsComputer, onExit }) {
         onAgain={handleAgain}
         onResetScore={handleResetScore}
         onExit={handleExit}
+      />
+
+      <CelebrationOverlay
+        visible={celebration.visible}
+        mainText={celebration.mainText}
+        scores={celebration.scores || scores}
+        flavorText={celebration.flavorText}
+        isLoss={celebration.isLoss}
       />
     </div>
   );
