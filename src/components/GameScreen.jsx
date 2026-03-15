@@ -16,12 +16,12 @@ import CelebrationOverlay from "./CelebrationOverlay";
 import RunOverScreen from "./RunOverScreen";
 import "../styles/game.css";
 
-const MAX_HEARTS = 5;
+const MAX_HEARTS    = 5;
 const STARTING_HEARTS = 3;
-const BEST_SCORE_KEY = "ttt_infinity_best";
+const BEST_SCORE_KEY  = "ttt_infinity_best";
 
 function getRandomHeartCoord(board, carryCoord) {
-  const forbidden = new Set(["1,1", carryCoord].filter(Boolean));
+  const forbidden  = new Set(["1,1", carryCoord].filter(Boolean));
   const candidates = Object.keys(board).filter(
     (k) => board[k] === "" && !forbidden.has(k)
   );
@@ -30,50 +30,45 @@ function getRandomHeartCoord(board, carryCoord) {
 }
 
 const INITIAL_STATE = () => ({
-  board: buildInitialBoard(),
-  movesX: [],
-  movesO: [],
+  board:         buildInitialBoard(),
+  movesX:        [],
+  movesO:        [],
   currentPlayer: "X",
-  phase: "playing",
-  winningCombo: null,
+  phase:         "playing",
+  winningCombo:  null,
   pendingWinner: null,
-  pendingCarry: null,
+  pendingCarry:  null,
   vanishedCoord: null,
-  newCoord: null,
-  heartCoord: null,
+  newCoord:      null,
+  heartCoord:    null,
 });
 
 export default function GameScreen({ vsComputer, onExit }) {
-  const [gameState, setGameState] = useState(INITIAL_STATE);
-  const [scores, setScores] = useState({ X: 0, O: 0 });
-  const [hearts, setHearts] = useState(STARTING_HEARTS);
-  const [heartAnimate, setHeartAnimate] = useState(null); // "gain" | "lose" | null
-  const [winStreak, setWinStreak] = useState(0);
-  const [runOver, setRunOver] = useState(false);
-  const [bestScore, setBestScore] = useState(
+  const [gameState,    setGameState]    = useState(INITIAL_STATE);
+  const [scores,       setScores]       = useState({ X: 0, O: 0 });
+  const [hearts,       setHearts]       = useState(STARTING_HEARTS);
+  const [heartAnimate, setHeartAnimate] = useState(null);
+  const [winStreak,    setWinStreak]    = useState(0);
+  const [runOver,      setRunOver]      = useState(false);
+  const [bestScore,    setBestScore]    = useState(
     () => parseInt(localStorage.getItem(BEST_SCORE_KEY) || "0", 10)
   );
   const [celebration, setCelebration] = useState({
-    visible: false,
-    mainText: "",
+    visible:    false,
+    mainText:   "",
     flavorText: "",
-    isLoss: false,
+    isLoss:     false,
   });
 
-  // Round cycle tracking for heart spawn
-  // heartSpawnRound is 2 or 3, decided fresh each cycle
-  const roundInCycleRef = useRef(0);
-  const heartSpawnRoundRef = useRef(
-    Math.random() < 0.5 ? 2 : 3
-  );
+  const roundInCycleRef    = useRef(0);
+  const heartSpawnRoundRef = useRef(Math.random() < 0.5 ? 2 : 3);
+  const difficulty         = getDifficulty(scores.X);
 
-  const difficulty = getDifficulty(scores.X);
-
-  const timerRef = useRef(null);
-  const vanishTimerRef = useRef(null);
+  const timerRef        = useRef(null);
+  const vanishTimerRef  = useRef(null);
   const newCoordTimerRef = useRef(null);
   const heartAnimTimerRef = useRef(null);
-  const gameStateRef = useRef(gameState);
+  const gameStateRef    = useRef(gameState);
 
   const bags = useRef({
     xWin:       createShuffleBag(POOLS.xWin),
@@ -88,7 +83,9 @@ export default function GameScreen({ vsComputer, onExit }) {
   }, [gameState]);
 
   const warningCoord = (() => {
-    const q = gameState.currentPlayer === "X" ? gameState.movesX : gameState.movesO;
+    const q = gameState.currentPlayer === "X"
+      ? gameState.movesX
+      : gameState.movesO;
     return getWarningCoord(q);
   })();
 
@@ -103,8 +100,7 @@ export default function GameScreen({ vsComputer, onExit }) {
 
     if (roundInCycleRef.current === heartSpawnRoundRef.current) {
       const coord = getRandomHeartCoord(board, carryCoord);
-      // Reset cycle
-      roundInCycleRef.current = 0;
+      roundInCycleRef.current    = 0;
       heartSpawnRoundRef.current = Math.random() < 0.5 ? 2 : 3;
       return coord;
     }
@@ -116,17 +112,15 @@ export default function GameScreen({ vsComputer, onExit }) {
     if (gameState.phase !== "victory") return;
 
     const { pendingWinner, pendingCarry } = gameState;
-    const isAIWin = vsComputer && pendingWinner === "O";
+    const isAIWin     = vsComputer && pendingWinner === "O";
     const isPlayerWin = pendingWinner === "X";
 
-    // Update scores and handle hearts
     setScores((s) => {
       const newScores = { ...s, [pendingWinner]: s[pendingWinner] + 1 };
 
-      // Hearts logic
       if (vsComputer) {
         if (isPlayerWin) {
-          // Check passive heart gain — every 3 wins if below 3
+          // Passive heart gain — every 3 wins if below 3
           setWinStreak((prev) => {
             const newStreak = prev + 1;
             if (newStreak % 3 === 0) {
@@ -141,12 +135,11 @@ export default function GameScreen({ vsComputer, onExit }) {
             return newStreak;
           });
         } else {
-          // AI won — lose a heart
+          // AI won — lose 1 heart
           setHearts((h) => {
             const newH = h - 1;
             triggerHeartAnimate("lose");
             if (newH <= 0) {
-              // Save best score
               const finalScore = s.X;
               setBestScore((prev) => {
                 const newBest = Math.max(prev, finalScore);
@@ -175,10 +168,10 @@ export default function GameScreen({ vsComputer, onExit }) {
         : bags.current.flavorWin.pick();
 
       setCelebration({
-        visible: true,
+        visible:    true,
         mainText,
         flavorText,
-        isLoss: isAIWin,
+        isLoss:     isAIWin,
       });
 
       return newScores;
@@ -195,9 +188,9 @@ export default function GameScreen({ vsComputer, onExit }) {
 
   // AI trigger
   useEffect(() => {
-    if (!vsComputer) return;
-    if (gameState.currentPlayer !== "O") return;
-    if (gameState.phase !== "playing") return;
+    if (!vsComputer)                      return;
+    if (gameState.currentPlayer !== "O")  return;
+    if (gameState.phase !== "playing")    return;
 
     timerRef.current = setTimeout(() => {
       const current = gameStateRef.current;
@@ -220,26 +213,13 @@ export default function GameScreen({ vsComputer, onExit }) {
   }, [gameState.currentPlayer, gameState.phase, vsComputer]);
 
   function handleCellClick(r, c) {
-    if (gameState.phase !== "playing") return;
-    if (vsComputer && gameState.currentPlayer === "O") return;
-    if (gameState.board[coordKey(r, c)] !== "") return;
+    if (gameState.phase !== "playing")                    return;
+    if (vsComputer && gameState.currentPlayer === "O")    return;
+    if (gameState.board[coordKey(r, c)] !== "")           return;
     processMove(r, c);
   }
 
   function processMove(r, c) {
-    const clickedKey = coordKey(r, c);
-
-    // Check if player collected the heart
-    if (vsComputer && gameState.heartCoord === clickedKey) {
-      setHearts((h) => {
-        if (h < MAX_HEARTS) {
-          triggerHeartAnimate("gain");
-          return h + 1;
-        }
-        return h;
-      });
-    }
-
     setGameState((prev) => {
       if (prev.phase !== "playing") return prev;
 
@@ -248,7 +228,7 @@ export default function GameScreen({ vsComputer, onExit }) {
       );
 
       const placedKey = coordKey(r, c);
-      const winCombo = checkWinner(newBoard, prev.currentPlayer);
+      const winCombo  = checkWinner(newBoard, prev.currentPlayer);
 
       if (vanished) {
         clearTimeout(vanishTimerRef.current);
@@ -262,66 +242,81 @@ export default function GameScreen({ vsComputer, onExit }) {
         setGameState((s) => ({ ...s, newCoord: null }));
       }, 300);
 
-      // Clear heart if anyone lands on it
-      const newHeartCoord = prev.heartCoord === placedKey ? null : prev.heartCoord;
+      // Collect heart if player lands on it
+      if (
+        vsComputer &&
+        prev.currentPlayer === "X" &&
+        prev.heartCoord === placedKey
+      ) {
+        setHearts((h) => {
+          if (h < MAX_HEARTS) {
+            triggerHeartAnimate("gain");
+            return h + 1;
+          }
+          return h;
+        });
+      }
+
+      const newHeartCoord = prev.heartCoord === placedKey
+        ? null
+        : prev.heartCoord;
 
       if (winCombo) {
         return {
           ...prev,
-          board: newBoard,
-          movesX: newMovesX,
-          movesO: newMovesO,
-          winningCombo: winCombo,
-          phase: "victory",
+          board:         newBoard,
+          movesX:        newMovesX,
+          movesO:        newMovesO,
+          winningCombo:  winCombo,
+          phase:         "victory",
           pendingWinner: prev.currentPlayer,
-          pendingCarry: [r, c],
+          pendingCarry:  [r, c],
           vanishedCoord: vanished || null,
-          newCoord: placedKey,
-          heartCoord: null,
+          newCoord:      placedKey,
+          heartCoord:    null,
         };
       }
 
       return {
         ...prev,
-        board: newBoard,
-        movesX: newMovesX,
-        movesO: newMovesO,
-        winningCombo: null,
-        phase: "playing",
+        board:         newBoard,
+        movesX:        newMovesX,
+        movesO:        newMovesO,
+        winningCombo:  null,
+        phase:         "playing",
         currentPlayer: prev.currentPlayer === "X" ? "O" : "X",
         vanishedCoord: vanished || null,
-        newCoord: placedKey,
-        heartCoord: newHeartCoord,
+        newCoord:      placedKey,
+        heartCoord:    newHeartCoord,
       };
     });
   }
 
   function triggerCarryover(r, c, winner) {
     const freshBoard = buildInitialBoard();
-    const key = coordKey(r, c);
-    freshBoard[key] = winner;
+    const key        = coordKey(r, c);
+    freshBoard[key]  = winner;
 
-    const newMovesX = winner === "X" ? [key] : [];
-    const newMovesO = winner === "O" ? [key] : [];
+    const newMovesX  = winner === "X" ? [key] : [];
+    const newMovesO  = winner === "O" ? [key] : [];
     const nextPlayer = winner === "X" ? "O" : "X";
 
-    // Decide if a heart spawns this round
     const heartCoord = vsComputer
       ? spawnHeartIfNeeded(freshBoard, key)
       : null;
 
     setGameState({
-      board: freshBoard,
-      movesX: newMovesX,
-      movesO: newMovesO,
+      board:         freshBoard,
+      movesX:        newMovesX,
+      movesO:        newMovesO,
       currentPlayer: nextPlayer,
-      phase: "playing",
-      winningCombo: null,
+      phase:         "playing",
+      winningCombo:  null,
       pendingWinner: null,
-      pendingCarry: null,
+      pendingCarry:  null,
       vanishedCoord: null,
-      newCoord: key,
-      heartCoord: heartCoord || null,
+      newCoord:      key,
+      heartCoord:    heartCoord || null,
     });
   }
 
@@ -330,7 +325,7 @@ export default function GameScreen({ vsComputer, onExit }) {
     clearTimeout(vanishTimerRef.current);
     clearTimeout(newCoordTimerRef.current);
     clearTimeout(heartAnimTimerRef.current);
-    roundInCycleRef.current = 0;
+    roundInCycleRef.current    = 0;
     heartSpawnRoundRef.current = Math.random() < 0.5 ? 2 : 3;
     setHearts(STARTING_HEARTS);
     setWinStreak(0);
@@ -368,17 +363,16 @@ export default function GameScreen({ vsComputer, onExit }) {
       <p className="game-mode-label">INFINITY MODE</p>
 
       {vsComputer && (
-        <HeartsDisplay
-          hearts={hearts}
-          maxHearts={MAX_HEARTS}
-          animate={heartAnimate}
-        />
-      )}
-
-      {vsComputer && (
-        <span className={`difficulty-badge difficulty--${difficulty}`}>
-          {difficulty.toUpperCase()}
-        </span>
+        <div className="game-meta-row">
+          <HeartsDisplay
+            hearts={hearts}
+            maxHearts={MAX_HEARTS}
+            animate={heartAnimate}
+          />
+          <span className={`difficulty-badge difficulty--${difficulty}`}>
+            {difficulty.toUpperCase()}
+          </span>
+        </div>
       )}
 
       <ScoreBoard scores={scores} currentPlayer={gameState.currentPlayer} />

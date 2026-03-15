@@ -16,16 +16,24 @@
   text-transform: uppercase;
 }
 
+/* Hearts + difficulty on same row */
+.game-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 2px;
+}
+
 /* Hearts Display */
 .hearts-display {
   display: flex;
-  gap: clamp(4px, 1.5vw, 8px);
+  gap: clamp(3px, 1vw, 6px);
   align-items: center;
-  justify-content: center;
 }
 
 .heart {
-  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
   transition: transform 0.2s ease;
   line-height: 1;
 }
@@ -60,6 +68,39 @@
   0%   { transform: scale(1); opacity: 1; }
   40%  { transform: scale(1.2); color: #fff; }
   100% { transform: scale(0); opacity: 0; }
+}
+
+/* Difficulty badge */
+.difficulty-badge {
+  font-family: var(--font-main);
+  font-size: clamp(0.6rem, 2vw, 0.7rem);
+  font-weight: bold;
+  letter-spacing: 3px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid;
+  transition: color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.difficulty--easy {
+  color: #4ade80;
+  border-color: #4ade80;
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
+  box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
+}
+
+.difficulty--medium {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  text-shadow: 0 0 8px rgba(247, 213, 29, 0.6);
+  box-shadow: 0 0 8px rgba(247, 213, 29, 0.2);
+}
+
+.difficulty--hard {
+  color: var(--color-x);
+  border-color: var(--color-x);
+  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
 }
 
 /* Scoreboard */
@@ -97,39 +138,6 @@
 
 .score-divider {
   color: var(--color-cell-border);
-}
-
-/* Difficulty badge */
-.difficulty-badge {
-  font-family: var(--font-main);
-  font-size: clamp(0.6rem, 2vw, 0.7rem);
-  font-weight: bold;
-  letter-spacing: 3px;
-  padding: 4px 12px;
-  border-radius: 4px;
-  border: 1px solid;
-  transition: color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-}
-
-.difficulty--easy {
-  color: #4ade80;
-  border-color: #4ade80;
-  text-shadow: 0 0 8px rgba(74, 222, 128, 0.6);
-  box-shadow: 0 0 8px rgba(74, 222, 128, 0.2);
-}
-
-.difficulty--medium {
-  color: var(--color-gold);
-  border-color: var(--color-gold);
-  text-shadow: 0 0 8px rgba(247, 213, 29, 0.6);
-  box-shadow: 0 0 8px rgba(247, 213, 29, 0.2);
-}
-
-.difficulty--hard {
-  color: var(--color-x);
-  border-color: var(--color-x);
-  text-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.2);
 }
 
 /* Controls */
