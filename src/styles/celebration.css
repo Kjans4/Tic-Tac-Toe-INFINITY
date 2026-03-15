@@ -48,7 +48,6 @@
   100% { transform: scale(1) translateY(0); opacity: 1; }
 }
 
-/* Main celebration text */
 .celebration-main {
   font-family: var(--font-main);
   font-size: clamp(1.4rem, 6vw, 2rem);
@@ -66,6 +65,7 @@
   text-shadow:
     0 0 10px var(--color-x),
     0 0 30px rgba(239, 68, 68, 0.5);
+  animation: text-glow-pulse-loss 1s ease-in-out infinite alternate;
 }
 
 @keyframes text-glow-pulse {
@@ -73,7 +73,11 @@
   to   { text-shadow: 0 0 18px var(--color-gold), 0 0 40px rgba(247, 213, 29, 0.65); }
 }
 
-/* Flavor text */
+@keyframes text-glow-pulse-loss {
+  from { text-shadow: 0 0 10px var(--color-x), 0 0 20px rgba(239, 68, 68, 0.4); }
+  to   { text-shadow: 0 0 18px var(--color-x), 0 0 40px rgba(239, 68, 68, 0.65); }
+}
+
 .celebration-flavor {
   font-family: var(--font-main);
   font-size: clamp(0.6rem, 2vw, 0.72rem);

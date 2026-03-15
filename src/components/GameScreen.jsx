@@ -6,17 +6,17 @@ import {
   getWarningCoord,
   coordKey,
 } from "../logic/gameLogic";
-import { getAIMove, getDifficulty } from "../logic/aiEngine";
-import { createShuffleBag, POOLS } from "../logic/shuffleBag";
-import ScoreBoard from "./ScoreBoard";
-import Board from "./Board";
-import Controls from "./Controls";
-import HeartsDisplay from "./HeartsDisplay";
-import CelebrationOverlay from "./CelebrationOverlay";
-import RunOverScreen from "./RunOverScreen";
+import { getAIMove, getDifficulty }   from "../logic/aiEngine";
+import { createShuffleBag, POOLS }    from "../logic/shuffleBag";
+import ScoreBoard                     from "./ScoreBoard";
+import Board                          from "./Board";
+import Controls                       from "./Controls";
+import HeartsDisplay                  from "./HeartsDisplay";
+import CelebrationOverlay             from "./CelebrationOverlay";
+import RunOverScreen                  from "./RunOverScreen";
 import "../styles/game.css";
 
-const MAX_HEARTS    = 5;
+const MAX_HEARTS      = 5;
 const STARTING_HEARTS = 3;
 const BEST_SCORE_KEY  = "ttt_infinity_best";
 
@@ -64,11 +64,22 @@ export default function GameScreen({ vsComputer, onExit }) {
   const heartSpawnRoundRef = useRef(Math.random() < 0.5 ? 2 : 3);
   const difficulty         = getDifficulty(scores.X);
 
-  const timerRef        = useRef(null);
-  const vanishTimerRef  = useRef(null);
+  // Stable refs so victory effect always reads latest values
+  const heartsRef    = useRef(hearts);
+  const winStreakRef = useRef(winStreak);
+  const scoresRef    = useRef(scores);
+
+  useEffect(() => { heartsRef.current    = hearts;    }, [hearts]);
+  useEffect(() => { winStreakRef.current = winStreak; }, [winStreak]);
+  useEffect(() => { scoresRef.current    = scores;    }, [scores]);
+
+  const timerRef         = useRef(null);
+  const vanishTimerRef   = useRef(null);
   const newCoordTimerRef = useRef(null);
   const heartAnimTimerRef = useRef(null);
-  const gameStateRef    = useRef(gameState);
+  const gameStateRef     = useRef(gameState);
+
+  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
 
   const bags = useRef({
     xWin:       createShuffleBag(POOLS.xWin),
@@ -77,10 +88,6 @@ export default function GameScreen({ vsComputer, onExit }) {
     flavorWin:  createShuffleBag(POOLS.flavorWin),
     flavorLose: createShuffleBag(POOLS.flavorLose),
   });
-
-  useEffect(() => {
-    gameStateRef.current = gameState;
-  }, [gameState]);
 
   const warningCoord = (() => {
     const q = gameState.currentPlayer === "X"
@@ -97,7 +104,6 @@ export default function GameScreen({ vsComputer, onExit }) {
 
   function spawnHeartIfNeeded(board, carryCoord) {
     roundInCycleRef.current += 1;
-
     if (roundInCycleRef.current === heartSpawnRoundRef.current) {
       const coord = getRandomHeartCoord(board, carryCoord);
       roundInCycleRef.current    = 0;
@@ -107,77 +113,62 @@ export default function GameScreen({ vsComputer, onExit }) {
     return null;
   }
 
-  // Victory effect
+  // Victory effect — all heart logic lives here, isolated from setScores
   useEffect(() => {
     if (gameState.phase !== "victory") return;
 
     const { pendingWinner, pendingCarry } = gameState;
     const isAIWin     = vsComputer && pendingWinner === "O";
-    const isPlayerWin = pendingWinner === "X";
+    const isPlayerWin = vsComputer && pendingWinner === "X";
 
-    setScores((s) => {
-      const newScores = { ...s, [pendingWinner]: s[pendingWinner] + 1 };
+    // 1. Update score — simple, no nested state calls
+    setScores((s) => ({ ...s, [pendingWinner]: s[pendingWinner] + 1 }));
 
-      if (vsComputer) {
-        if (isPlayerWin) {
-          // Passive heart gain — every 3 wins if below 3
-          setWinStreak((prev) => {
-            const newStreak = prev + 1;
-            if (newStreak % 3 === 0) {
-              setHearts((h) => {
-                if (h < 3) {
-                  triggerHeartAnimate("gain");
-                  return h + 1;
-                }
-                return h;
-              });
-            }
-            return newStreak;
+    // 2. Heart logic — reads stable refs, no nesting
+    if (vsComputer) {
+      if (isPlayerWin) {
+        const newStreak = winStreakRef.current + 1;
+        setWinStreak(newStreak);
+        // Passive gain: every 3 wins, if hearts below 3
+        if (newStreak % 3 === 0 && heartsRef.current < 3) {
+          setHearts((h) => h + 1);
+          triggerHeartAnimate("gain");
+        }
+      } else {
+        // AI won — lose exactly 1 heart
+        const newHearts = heartsRef.current - 1;
+        setHearts(Math.max(newHearts, 0));
+        triggerHeartAnimate("lose");
+
+        if (newHearts <= 0) {
+          const finalScore = scoresRef.current.X;
+          setBestScore((prev) => {
+            const newBest = Math.max(prev, finalScore);
+            localStorage.setItem(BEST_SCORE_KEY, String(newBest));
+            return newBest;
           });
-        } else {
-          // AI won — lose 1 heart
-          setHearts((h) => {
-            const newH = h - 1;
-            triggerHeartAnimate("lose");
-            if (newH <= 0) {
-              const finalScore = s.X;
-              setBestScore((prev) => {
-                const newBest = Math.max(prev, finalScore);
-                localStorage.setItem(BEST_SCORE_KEY, String(newBest));
-                return newBest;
-              });
-              timerRef.current = setTimeout(() => setRunOver(true), 1800);
-            }
-            return Math.max(newH, 0);
-          });
+          timerRef.current = setTimeout(() => setRunOver(true), 1800);
         }
       }
+    }
 
-      // Celebration text
-      let mainText;
-      if (isAIWin) {
-        mainText = bags.current.aiWin.pick();
-      } else if (vsComputer && isPlayerWin) {
-        mainText = bags.current.xWin.pick();
-      } else {
-        mainText = `${pendingWinner}  —  ${bags.current.sharedWin.pick()}`;
-      }
+    // 3. Celebration text
+    let mainText;
+    if (isAIWin) {
+      mainText = bags.current.aiWin.pick();
+    } else if (isPlayerWin) {
+      mainText = bags.current.xWin.pick();
+    } else {
+      mainText = `${pendingWinner}  —  ${bags.current.sharedWin.pick()}`;
+    }
 
-      const flavorText = isAIWin
-        ? bags.current.flavorLose.pick()
-        : bags.current.flavorWin.pick();
+    const flavorText = isAIWin
+      ? bags.current.flavorLose.pick()
+      : bags.current.flavorWin.pick();
 
-      setCelebration({
-        visible:    true,
-        mainText,
-        flavorText,
-        isLoss:     isAIWin,
-      });
+    setCelebration({ visible: true, mainText, flavorText, isLoss: isAIWin });
 
-      return newScores;
-    });
-
-    // Carryover after celebration
+    // 4. Carryover after celebration
     timerRef.current = setTimeout(() => {
       setCelebration({ visible: false, mainText: "", flavorText: "", isLoss: false });
       triggerCarryover(pendingCarry[0], pendingCarry[1], pendingWinner);
@@ -188,9 +179,9 @@ export default function GameScreen({ vsComputer, onExit }) {
 
   // AI trigger
   useEffect(() => {
-    if (!vsComputer)                      return;
-    if (gameState.currentPlayer !== "O")  return;
-    if (gameState.phase !== "playing")    return;
+    if (!vsComputer)                     return;
+    if (gameState.currentPlayer !== "O") return;
+    if (gameState.phase !== "playing")   return;
 
     timerRef.current = setTimeout(() => {
       const current = gameStateRef.current;
@@ -200,7 +191,7 @@ export default function GameScreen({ vsComputer, onExit }) {
         current.board,
         current.movesX,
         current.movesO,
-        scores.X
+        scoresRef.current.X
       );
 
       if (moveKey) {
@@ -213,9 +204,9 @@ export default function GameScreen({ vsComputer, onExit }) {
   }, [gameState.currentPlayer, gameState.phase, vsComputer]);
 
   function handleCellClick(r, c) {
-    if (gameState.phase !== "playing")                    return;
-    if (vsComputer && gameState.currentPlayer === "O")    return;
-    if (gameState.board[coordKey(r, c)] !== "")           return;
+    if (gameState.phase !== "playing")                 return;
+    if (vsComputer && gameState.currentPlayer === "O") return;
+    if (gameState.board[coordKey(r, c)] !== "")        return;
     processMove(r, c);
   }
 
@@ -248,13 +239,10 @@ export default function GameScreen({ vsComputer, onExit }) {
         prev.currentPlayer === "X" &&
         prev.heartCoord === placedKey
       ) {
-        setHearts((h) => {
-          if (h < MAX_HEARTS) {
-            triggerHeartAnimate("gain");
-            return h + 1;
-          }
-          return h;
-        });
+        if (heartsRef.current < MAX_HEARTS) {
+          setHearts((h) => h + 1);
+          triggerHeartAnimate("gain");
+        }
       }
 
       const newHeartCoord = prev.heartCoord === placedKey
