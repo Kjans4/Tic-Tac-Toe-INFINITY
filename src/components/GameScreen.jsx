@@ -20,6 +20,11 @@ const MAX_HEARTS      = 5;
 const STARTING_HEARTS = 3;
 const BEST_SCORE_KEY  = "ttt_infinity_best";
 
+// Round 3, 4, or 5 — lower spawn rate than before
+function nextSpawnRound() {
+  return 3 + Math.floor(Math.random() * 3); // 3, 4, or 5
+}
+
 function getRandomHeartCoord(board, carryCoord) {
   const forbidden  = new Set(["1,1", carryCoord].filter(Boolean));
   const candidates = Object.keys(board).filter(
@@ -29,59 +34,63 @@ function getRandomHeartCoord(board, carryCoord) {
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
-const INITIAL_STATE = () => ({
+const INITIAL_GAME = () => ({
   board:         buildInitialBoard(),
   movesX:        [],
   movesO:        [],
   currentPlayer: "X",
-  phase:         "playing",
+  phase:         "playing",  // "playing" | "victory"
   winningCombo:  null,
   pendingWinner: null,
   pendingCarry:  null,
   vanishedCoord: null,
   newCoord:      null,
   heartCoord:    null,
-  heartCollected: false, // track if heart was collected this move
 });
 
 export default function GameScreen({ vsComputer, onExit }) {
-  const [gameState,    setGameState]    = useState(INITIAL_STATE);
-  const [scores,       setScores]       = useState({ X: 0, O: 0 });
-  const [hearts,       setHearts]       = useState(STARTING_HEARTS);
-  const [heartAnimate, setHeartAnimate] = useState(null);
-  const [winStreak,    setWinStreak]    = useState(0);
-  const [runOver,      setRunOver]      = useState(false);
-  const [bestScore,    setBestScore]    = useState(
+  // ── Core game state ──────────────────────────────────────────────
+  const [game,        setGame]        = useState(INITIAL_GAME);
+  const [scores,      setScores]      = useState({ X: 0, O: 0 });
+
+  // ── Heart system state ───────────────────────────────────────────
+  const [hearts,       setHearts]      = useState(STARTING_HEARTS);
+  const [heartAnimate, setHeartAnimate]= useState(null); // "gain"|"lose"|null
+  const [winStreak,    setWinStreak]   = useState(0);
+  const [runOver,      setRunOver]     = useState(false);
+  const [bestScore,    setBestScore]   = useState(
     () => parseInt(localStorage.getItem(BEST_SCORE_KEY) || "0", 10)
   );
+
+  // ── Celebration state ────────────────────────────────────────────
   const [celebration, setCelebration] = useState({
-    visible:    false,
-    mainText:   "",
-    flavorText: "",
-    isLoss:     false,
+    visible: false, mainText: "", flavorText: "", isLoss: false,
   });
 
-  const roundInCycleRef    = useRef(0);
-  const heartSpawnRoundRef = useRef(Math.random() < 0.5 ? 2 : 3);
-  const difficulty         = getDifficulty(scores.X);
+  // ── Refs ─────────────────────────────────────────────────────────
+  // Stable value refs — always current, safe to read inside callbacks
+  const heartsRef    = useRef(STARTING_HEARTS);
+  const winStreakRef = useRef(0);
+  const scoresRef    = useRef({ X: 0, O: 0 });
+  const gameRef      = useRef(game);
 
-  // Stable refs so effects always read latest values
-  const heartsRef    = useRef(hearts);
-  const winStreakRef = useRef(winStreak);
-  const scoresRef    = useRef(scores);
-
-  useEffect(() => { heartsRef.current    = hearts;    }, [hearts]);
+  // Keep refs in sync
+  useEffect(() => { heartsRef.current    = hearts;  }, [hearts]);
   useEffect(() => { winStreakRef.current = winStreak; }, [winStreak]);
-  useEffect(() => { scoresRef.current    = scores;    }, [scores]);
+  useEffect(() => { scoresRef.current    = scores;  }, [scores]);
+  useEffect(() => { gameRef.current      = game;    }, [game]);
 
-  const timerRef          = useRef(null);
+  // Timer refs
+  const mainTimerRef      = useRef(null);
   const vanishTimerRef    = useRef(null);
   const newCoordTimerRef  = useRef(null);
   const heartAnimTimerRef = useRef(null);
-  const gameStateRef      = useRef(gameState);
 
-  useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
+  // Heart spawn cycle
+  const roundInCycleRef = useRef(0);
+  const spawnRoundRef   = useRef(nextSpawnRound());
 
+  // Shuffle bags
   const bags = useRef({
     xWin:       createShuffleBag(POOLS.xWin),
     sharedWin:  createShuffleBag(POOLS.sharedWin),
@@ -90,72 +99,79 @@ export default function GameScreen({ vsComputer, onExit }) {
     flavorLose: createShuffleBag(POOLS.flavorLose),
   });
 
+  const difficulty = getDifficulty(scores.X);
+
   const warningCoord = (() => {
-    const q = gameState.currentPlayer === "X"
-      ? gameState.movesX
-      : gameState.movesO;
+    const q = game.currentPlayer === "X" ? game.movesX : game.movesO;
     return getWarningCoord(q);
   })();
 
-  function triggerHeartAnimate(type) {
-    setHeartAnimate(type);
+  // ── Heart animation helper ────────────────────────────────────────
+  function flashHeart(type) {
     clearTimeout(heartAnimTimerRef.current);
-    heartAnimTimerRef.current = setTimeout(() => setHeartAnimate(null), 500);
+    setHeartAnimate(type);
+    heartAnimTimerRef.current = setTimeout(() => setHeartAnimate(null), 600);
   }
 
-  function spawnHeartIfNeeded(board, carryCoord) {
+  // ── Heart spawn helper ────────────────────────────────────────────
+  function maybeSpawnHeart(board, carryCoord) {
+    if (!vsComputer) return null;
     roundInCycleRef.current += 1;
-    if (roundInCycleRef.current === heartSpawnRoundRef.current) {
-      const coord = getRandomHeartCoord(board, carryCoord);
-      roundInCycleRef.current    = 0;
-      heartSpawnRoundRef.current = Math.random() < 0.5 ? 2 : 3;
-      return coord;
+    if (roundInCycleRef.current >= spawnRoundRef.current) {
+      roundInCycleRef.current = 0;
+      spawnRoundRef.current   = nextSpawnRound();
+      return getRandomHeartCoord(board, carryCoord);
     }
     return null;
   }
 
-  // Victory effect
+  // ── Victory effect ────────────────────────────────────────────────
+  // Fires once when phase flips to "victory".
+  // ALL heart changes happen here — no nested setState.
   useEffect(() => {
-    if (gameState.phase !== "victory") return;
+    if (game.phase !== "victory") return;
 
-    const { pendingWinner, pendingCarry, heartCollected } = gameState;
+    const { pendingWinner, pendingCarry } = game;
     const isAIWin     = vsComputer && pendingWinner === "O";
     const isPlayerWin = vsComputer && pendingWinner === "X";
 
-    // 1. Update score
-    setScores((s) => ({ ...s, [pendingWinner]: s[pendingWinner] + 1 }));
+    // ── 1. Score update ──
+    const newScores = {
+      X: scoresRef.current.X + (pendingWinner === "X" ? 1 : 0),
+      O: scoresRef.current.O + (pendingWinner === "O" ? 1 : 0),
+    };
+    setScores(newScores);
 
-    // 2. Heart logic — only passive gain here, never active (cell collection
-    //    already handled in processMove before victory is set)
+    // ── 2. Heart update — one block, no nesting ──
     if (vsComputer) {
-      if (isPlayerWin) {
+      if (isAIWin) {
+        // Lose exactly 1
+        const next = Math.max(heartsRef.current - 1, 0);
+        setHearts(next);
+        flashHeart("lose");
+
+        if (next === 0) {
+          // Save best score using the score BEFORE this round incremented O
+          const finalScore = scoresRef.current.X;
+          const newBest    = Math.max(parseInt(localStorage.getItem(BEST_SCORE_KEY) || "0", 10), finalScore);
+          localStorage.setItem(BEST_SCORE_KEY, String(newBest));
+          setBestScore(newBest);
+          // Show run over after celebration finishes
+          mainTimerRef.current = setTimeout(() => setRunOver(true), 1900);
+        }
+      } else if (isPlayerWin) {
+        // Passive gain: every 3 wins, only if below 3
         const newStreak = winStreakRef.current + 1;
         setWinStreak(newStreak);
-        // Passive gain every 3 wins if below 3 hearts
-        // Skip if heart was already collected this move to avoid double gain
-        if (newStreak % 3 === 0 && heartsRef.current < 3 && !heartCollected) {
-          setHearts((h) => h + 1);
-          triggerHeartAnimate("gain");
-        }
-      } else {
-        // AI won — lose exactly 1 heart
-        const newHearts = heartsRef.current - 1;
-        setHearts(Math.max(newHearts, 0));
-        triggerHeartAnimate("lose");
-
-        if (newHearts <= 0) {
-          const finalScore = scoresRef.current.X;
-          setBestScore((prev) => {
-            const newBest = Math.max(prev, finalScore);
-            localStorage.setItem(BEST_SCORE_KEY, String(newBest));
-            return newBest;
-          });
-          timerRef.current = setTimeout(() => setRunOver(true), 1800);
+        if (newStreak % 3 === 0 && heartsRef.current < 3) {
+          const next = heartsRef.current + 1;
+          setHearts(next);
+          flashHeart("gain");
         }
       }
     }
 
-    // 3. Celebration text
+    // ── 3. Celebration ──
     let mainText;
     if (isAIWin) {
       mainText = bags.current.aiWin.pick();
@@ -164,179 +180,168 @@ export default function GameScreen({ vsComputer, onExit }) {
     } else {
       mainText = `${pendingWinner}  —  ${bags.current.sharedWin.pick()}`;
     }
-
     const flavorText = isAIWin
       ? bags.current.flavorLose.pick()
       : bags.current.flavorWin.pick();
 
     setCelebration({ visible: true, mainText, flavorText, isLoss: isAIWin });
 
-    // 4. Carryover
-    timerRef.current = setTimeout(() => {
+    // ── 4. Next round after delay ──
+    mainTimerRef.current = setTimeout(() => {
       setCelebration({ visible: false, mainText: "", flavorText: "", isLoss: false });
-      triggerCarryover(pendingCarry[0], pendingCarry[1], pendingWinner);
+      doCarryover(pendingCarry[0], pendingCarry[1], pendingWinner);
     }, 1800);
 
-    return () => clearTimeout(timerRef.current);
-  }, [gameState.phase]);
+    return () => clearTimeout(mainTimerRef.current);
+  }, [game.phase]);
 
-  // AI trigger
+  // ── AI trigger ────────────────────────────────────────────────────
   useEffect(() => {
-    if (!vsComputer)                     return;
-    if (gameState.currentPlayer !== "O") return;
-    if (gameState.phase !== "playing")   return;
+    if (!vsComputer)                    return;
+    if (game.currentPlayer !== "O")     return;
+    if (game.phase !== "playing")       return;
 
-    timerRef.current = setTimeout(() => {
-      const current = gameStateRef.current;
-      if (current.phase !== "playing" || current.currentPlayer !== "O") return;
+    mainTimerRef.current = setTimeout(() => {
+      const g = gameRef.current;
+      if (g.phase !== "playing" || g.currentPlayer !== "O") return;
 
-      const moveKey = getAIMove(
-        current.board,
-        current.movesX,
-        current.movesO,
-        scoresRef.current.X
-      );
-
+      const moveKey = getAIMove(g.board, g.movesX, g.movesO, scoresRef.current.X);
       if (moveKey) {
         const [r, c] = moveKey.split(",").map(Number);
-        processMove(r, c);
+        doMove(r, c);
       }
     }, 400);
 
-    return () => clearTimeout(timerRef.current);
-  }, [gameState.currentPlayer, gameState.phase, vsComputer]);
+    return () => clearTimeout(mainTimerRef.current);
+  }, [game.currentPlayer, game.phase, vsComputer]);
 
+  // ── Click handler ─────────────────────────────────────────────────
   function handleCellClick(r, c) {
-    if (gameState.phase !== "playing")                 return;
-    if (vsComputer && gameState.currentPlayer === "O") return;
-    if (gameState.board[coordKey(r, c)] !== "")        return;
-    processMove(r, c);
+    if (game.phase !== "playing")                 return;
+    if (vsComputer && game.currentPlayer === "O") return;
+    if (game.board[coordKey(r, c)] !== "")        return;
+    doMove(r, c);
   }
 
-  function processMove(r, c) {
-    setGameState((prev) => {
+  // ── Core move processor ───────────────────────────────────────────
+  function doMove(r, c) {
+    setGame((prev) => {
       if (prev.phase !== "playing") return prev;
 
+      const placedKey = coordKey(r, c);
       const { newBoard, newMovesX, newMovesO, vanished } = recordMove(
         prev.board, prev.movesX, prev.movesO, prev.currentPlayer, r, c
       );
 
-      const placedKey = coordKey(r, c);
-      const winCombo  = checkWinner(newBoard, prev.currentPlayer);
-
+      // Vanish animation timer
       if (vanished) {
         clearTimeout(vanishTimerRef.current);
-        vanishTimerRef.current = setTimeout(() => {
-          setGameState((s) => ({ ...s, vanishedCoord: null }));
-        }, 250);
+        vanishTimerRef.current = setTimeout(
+          () => setGame((s) => ({ ...s, vanishedCoord: null })),
+          260
+        );
       }
 
+      // Pop-in animation timer
       clearTimeout(newCoordTimerRef.current);
-      newCoordTimerRef.current = setTimeout(() => {
-        setGameState((s) => ({ ...s, newCoord: null }));
-      }, 300);
+      newCoordTimerRef.current = setTimeout(
+        () => setGame((s) => ({ ...s, newCoord: null })),
+        320
+      );
 
-      // Collect heart — only if player (X) lands on heart cell
-      let heartCollected = false;
-      if (
+      // Heart cell collection — only player (X), only active cell
+      // Exactly one setHearts call, zero nesting
+      const isHeartCell = (
         vsComputer &&
         prev.currentPlayer === "X" &&
-        prev.heartCoord === placedKey &&
-        heartsRef.current < MAX_HEARTS
-      ) {
-        setHearts((h) => h + 1);
-        triggerHeartAnimate("gain");
-        heartCollected = true;
+        prev.heartCoord === placedKey
+      );
+      if (isHeartCell && heartsRef.current < MAX_HEARTS) {
+        setHearts(heartsRef.current + 1);
+        flashHeart("gain");
       }
 
-      const newHeartCoord = prev.heartCoord === placedKey
-        ? null
-        : prev.heartCoord;
+      const newHeartCoord = prev.heartCoord === placedKey ? null : prev.heartCoord;
+      const winCombo      = checkWinner(newBoard, prev.currentPlayer);
 
       if (winCombo) {
         return {
           ...prev,
-          board:          newBoard,
-          movesX:         newMovesX,
-          movesO:         newMovesO,
-          winningCombo:   winCombo,
-          phase:          "victory",
-          pendingWinner:  prev.currentPlayer,
-          pendingCarry:   [r, c],
-          vanishedCoord:  vanished || null,
-          newCoord:       placedKey,
-          heartCoord:     null,
-          heartCollected, // pass to victory effect so passive gain skips
+          board:         newBoard,
+          movesX:        newMovesX,
+          movesO:        newMovesO,
+          winningCombo:  winCombo,
+          phase:         "victory",
+          pendingWinner: prev.currentPlayer,
+          pendingCarry:  [r, c],
+          vanishedCoord: vanished || null,
+          newCoord:      placedKey,
+          heartCoord:    null,
         };
       }
 
       return {
         ...prev,
-        board:          newBoard,
-        movesX:         newMovesX,
-        movesO:         newMovesO,
-        winningCombo:   null,
-        phase:          "playing",
-        currentPlayer:  prev.currentPlayer === "X" ? "O" : "X",
-        vanishedCoord:  vanished || null,
-        newCoord:       placedKey,
-        heartCoord:     newHeartCoord,
-        heartCollected: false,
+        board:         newBoard,
+        movesX:        newMovesX,
+        movesO:        newMovesO,
+        winningCombo:  null,
+        phase:         "playing",
+        currentPlayer: prev.currentPlayer === "X" ? "O" : "X",
+        vanishedCoord: vanished || null,
+        newCoord:      placedKey,
+        heartCoord:    newHeartCoord,
       };
     });
   }
 
-  function triggerCarryover(r, c, winner) {
-    const freshBoard = buildInitialBoard();
-    const key        = coordKey(r, c);
-    freshBoard[key]  = winner;
+  // ── Carryover ─────────────────────────────────────────────────────
+  function doCarryover(r, c, winner) {
+    const freshBoard    = buildInitialBoard();
+    const key           = coordKey(r, c);
+    freshBoard[key]     = winner;
+    const nextPlayer    = winner === "X" ? "O" : "X";
+    const heartCoord    = maybeSpawnHeart(freshBoard, key);
 
-    const newMovesX  = winner === "X" ? [key] : [];
-    const newMovesO  = winner === "O" ? [key] : [];
-    const nextPlayer = winner === "X" ? "O" : "X";
-
-    const heartCoord = vsComputer
-      ? spawnHeartIfNeeded(freshBoard, key)
-      : null;
-
-    setGameState({
-      board:          freshBoard,
-      movesX:         newMovesX,
-      movesO:         newMovesO,
-      currentPlayer:  nextPlayer,
-      phase:          "playing",
-      winningCombo:   null,
-      pendingWinner:  null,
-      pendingCarry:   null,
-      vanishedCoord:  null,
-      newCoord:       key,
-      heartCoord:     heartCoord || null,
-      heartCollected: false,
+    setGame({
+      board:         freshBoard,
+      movesX:        winner === "X" ? [key] : [],
+      movesO:        winner === "O" ? [key] : [],
+      currentPlayer: nextPlayer,
+      phase:         "playing",
+      winningCombo:  null,
+      pendingWinner: null,
+      pendingCarry:  null,
+      vanishedCoord: null,
+      newCoord:      key,
+      heartCoord:    heartCoord || null,
     });
   }
 
-  function handleRestart() {
-    clearTimeout(timerRef.current);
+  // ── Control handlers ──────────────────────────────────────────────
+  function clearAllTimers() {
+    clearTimeout(mainTimerRef.current);
     clearTimeout(vanishTimerRef.current);
     clearTimeout(newCoordTimerRef.current);
     clearTimeout(heartAnimTimerRef.current);
-    roundInCycleRef.current    = 0;
-    heartSpawnRoundRef.current = Math.random() < 0.5 ? 2 : 3;
+  }
+
+  function handleRestart() {
+    clearAllTimers();
+    roundInCycleRef.current = 0;
+    spawnRoundRef.current   = nextSpawnRound();
     setHearts(STARTING_HEARTS);
     setWinStreak(0);
     setScores({ X: 0, O: 0 });
     setRunOver(false);
     setCelebration({ visible: false, mainText: "", flavorText: "", isLoss: false });
-    setGameState(INITIAL_STATE());
+    setGame(INITIAL_GAME());
   }
 
   function handleAgain() {
-    clearTimeout(timerRef.current);
-    clearTimeout(vanishTimerRef.current);
-    clearTimeout(newCoordTimerRef.current);
-    clearTimeout(heartAnimTimerRef.current);
+    clearAllTimers();
     setCelebration({ visible: false, mainText: "", flavorText: "", isLoss: false });
-    setGameState(INITIAL_STATE());
+    setGame(INITIAL_GAME());
   }
 
   function handleResetScore() {
@@ -345,14 +350,12 @@ export default function GameScreen({ vsComputer, onExit }) {
   }
 
   function handleExit() {
-    clearTimeout(timerRef.current);
-    clearTimeout(vanishTimerRef.current);
-    clearTimeout(newCoordTimerRef.current);
-    clearTimeout(heartAnimTimerRef.current);
+    clearAllTimers();
     setCelebration({ visible: false, mainText: "", flavorText: "", isLoss: false });
     onExit();
   }
 
+  // ── Render ────────────────────────────────────────────────────────
   return (
     <div className="game-container">
       <p className="game-mode-label">INFINITY MODE</p>
@@ -370,16 +373,18 @@ export default function GameScreen({ vsComputer, onExit }) {
         </div>
       )}
 
-      <ScoreBoard scores={scores} currentPlayer={gameState.currentPlayer} />
+      <ScoreBoard scores={scores} currentPlayer={game.currentPlayer} />
+
       <Board
-        board={gameState.board}
-        winningCombo={gameState.winningCombo}
+        board={game.board}
+        winningCombo={game.winningCombo}
         warningCoord={warningCoord}
-        vanishedCoord={gameState.vanishedCoord}
-        newCoord={gameState.newCoord}
-        heartCoord={vsComputer ? gameState.heartCoord : null}
+        vanishedCoord={game.vanishedCoord}
+        newCoord={game.newCoord}
+        heartCoord={vsComputer ? game.heartCoord : null}
         onCellClick={handleCellClick}
       />
+
       <Controls
         onAgain={handleAgain}
         onResetScore={handleResetScore}

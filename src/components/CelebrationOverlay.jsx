@@ -9,11 +9,9 @@ export default function CelebrationOverlay({
   if (!visible) return null;
 
   return (
-    <div className={`celebration-overlay ${isLoss ? "celebration-overlay--loss" : ""}`}>
-      <div className="celebration-content">
-        <p className={`celebration-main ${isLoss ? "celebration-main--loss" : ""}`}>
-          {mainText}
-        </p>
+    <div className={`celebration-overlay${isLoss ? " celebration-overlay--loss" : ""}`}>
+      <div className="celebration-card">
+        <p className="celebration-main">{mainText}</p>
         <p className="celebration-flavor">{flavorText}</p>
       </div>
     </div>

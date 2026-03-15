@@ -1,4 +1,4 @@
-import "../styles/game.css";
+import "../styles/runover.css";
 
 export default function RunOverScreen({ visible, playerScore, bestScore, onRestart }) {
   if (!visible) return null;
@@ -7,23 +7,27 @@ export default function RunOverScreen({ visible, playerScore, bestScore, onResta
 
   return (
     <div className="runover-overlay">
-      <div className="runover-content">
+      <div className="runover-card">
         <p className="runover-title">GAME OVER</p>
+
         <div className="runover-divider" />
+
         <div className="runover-scores">
-          <div className="runover-score-row">
-            <span className="runover-score-label">YOUR SCORE</span>
-            <span className="runover-score-value">{playerScore}</span>
+          <div className="runover-row">
+            <span className="runover-label">YOUR SCORE</span>
+            <span className="runover-value">{playerScore}</span>
           </div>
-          <div className="runover-score-row">
-            <span className="runover-score-label">BEST RUN</span>
-            <span className={`runover-score-value ${isNewBest ? "runover-score-value--best" : ""}`}>
+          <div className="runover-row">
+            <span className="runover-label">BEST RUN</span>
+            <span className={`runover-value ${isNewBest ? "runover-value--gold" : ""}`}>
               {bestScore}
-              {isNewBest && <span className="runover-new-best"> NEW</span>}
+              {isNewBest && <span className="runover-new"> NEW</span>}
             </span>
           </div>
         </div>
+
         <div className="runover-divider" />
+
         <button className="runover-btn" onClick={onRestart}>
           START NEW RUN
         </button>
