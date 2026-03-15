@@ -89,6 +89,31 @@
   100% { transform: scale(1.08); }
 }
 
+/* Heart cell */
+.cell--heart {
+  border-color: var(--color-x);
+  box-shadow:
+    0 0 12px rgba(239, 68, 68, 0.5),
+    4px 4px 0px rgba(0, 0, 0, 0.5);
+  animation: pulse-heart 1.4s ease-in-out infinite;
+}
+
+.cell--heart .heart-icon {
+  font-size: calc(var(--cell-font) * 0.7);
+  color: var(--color-x);
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.8);
+  pointer-events: none;
+}
+
+@keyframes pulse-heart {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.5), 4px 4px 0px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(239, 68, 68, 0.8), 4px 4px 0px rgba(0, 0, 0, 0.5);
+  }
+}
+
 .cell--winner:hover {
   transform: scale(1.08);
 }

@@ -7,11 +7,13 @@ export default function Board({
   warningCoord,
   vanishedCoord,
   newCoord,
+  heartCoord,
   onCellClick,
 }) {
   function getHighlight(key) {
     if (winningCombo && winningCombo.includes(key)) return "winner";
     if (vanishedCoord === key) return "vanish";
+    if (heartCoord === key)    return "heart";
     if (warningCoord === key)  return "warning";
     return null;
   }
