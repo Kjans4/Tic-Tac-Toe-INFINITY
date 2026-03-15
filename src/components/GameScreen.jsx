@@ -41,6 +41,7 @@ const INITIAL_STATE = () => ({
   vanishedCoord: null,
   newCoord:      null,
   heartCoord:    null,
+  heartCollected: false, // track if heart was collected this move
 });
 
 export default function GameScreen({ vsComputer, onExit }) {
@@ -64,7 +65,7 @@ export default function GameScreen({ vsComputer, onExit }) {
   const heartSpawnRoundRef = useRef(Math.random() < 0.5 ? 2 : 3);
   const difficulty         = getDifficulty(scores.X);
 
-  // Stable refs so victory effect always reads latest values
+  // Stable refs so effects always read latest values
   const heartsRef    = useRef(hearts);
   const winStreakRef = useRef(winStreak);
   const scoresRef    = useRef(scores);
@@ -73,11 +74,11 @@ export default function GameScreen({ vsComputer, onExit }) {
   useEffect(() => { winStreakRef.current = winStreak; }, [winStreak]);
   useEffect(() => { scoresRef.current    = scores;    }, [scores]);
 
-  const timerRef         = useRef(null);
-  const vanishTimerRef   = useRef(null);
-  const newCoordTimerRef = useRef(null);
+  const timerRef          = useRef(null);
+  const vanishTimerRef    = useRef(null);
+  const newCoordTimerRef  = useRef(null);
   const heartAnimTimerRef = useRef(null);
-  const gameStateRef     = useRef(gameState);
+  const gameStateRef      = useRef(gameState);
 
   useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
 
@@ -113,24 +114,26 @@ export default function GameScreen({ vsComputer, onExit }) {
     return null;
   }
 
-  // Victory effect — all heart logic lives here, isolated from setScores
+  // Victory effect
   useEffect(() => {
     if (gameState.phase !== "victory") return;
 
-    const { pendingWinner, pendingCarry } = gameState;
+    const { pendingWinner, pendingCarry, heartCollected } = gameState;
     const isAIWin     = vsComputer && pendingWinner === "O";
     const isPlayerWin = vsComputer && pendingWinner === "X";
 
-    // 1. Update score — simple, no nested state calls
+    // 1. Update score
     setScores((s) => ({ ...s, [pendingWinner]: s[pendingWinner] + 1 }));
 
-    // 2. Heart logic — reads stable refs, no nesting
+    // 2. Heart logic — only passive gain here, never active (cell collection
+    //    already handled in processMove before victory is set)
     if (vsComputer) {
       if (isPlayerWin) {
         const newStreak = winStreakRef.current + 1;
         setWinStreak(newStreak);
-        // Passive gain: every 3 wins, if hearts below 3
-        if (newStreak % 3 === 0 && heartsRef.current < 3) {
+        // Passive gain every 3 wins if below 3 hearts
+        // Skip if heart was already collected this move to avoid double gain
+        if (newStreak % 3 === 0 && heartsRef.current < 3 && !heartCollected) {
           setHearts((h) => h + 1);
           triggerHeartAnimate("gain");
         }
@@ -168,7 +171,7 @@ export default function GameScreen({ vsComputer, onExit }) {
 
     setCelebration({ visible: true, mainText, flavorText, isLoss: isAIWin });
 
-    // 4. Carryover after celebration
+    // 4. Carryover
     timerRef.current = setTimeout(() => {
       setCelebration({ visible: false, mainText: "", flavorText: "", isLoss: false });
       triggerCarryover(pendingCarry[0], pendingCarry[1], pendingWinner);
@@ -233,16 +236,17 @@ export default function GameScreen({ vsComputer, onExit }) {
         setGameState((s) => ({ ...s, newCoord: null }));
       }, 300);
 
-      // Collect heart if player lands on it
+      // Collect heart — only if player (X) lands on heart cell
+      let heartCollected = false;
       if (
         vsComputer &&
         prev.currentPlayer === "X" &&
-        prev.heartCoord === placedKey
+        prev.heartCoord === placedKey &&
+        heartsRef.current < MAX_HEARTS
       ) {
-        if (heartsRef.current < MAX_HEARTS) {
-          setHearts((h) => h + 1);
-          triggerHeartAnimate("gain");
-        }
+        setHearts((h) => h + 1);
+        triggerHeartAnimate("gain");
+        heartCollected = true;
       }
 
       const newHeartCoord = prev.heartCoord === placedKey
@@ -252,30 +256,32 @@ export default function GameScreen({ vsComputer, onExit }) {
       if (winCombo) {
         return {
           ...prev,
-          board:         newBoard,
-          movesX:        newMovesX,
-          movesO:        newMovesO,
-          winningCombo:  winCombo,
-          phase:         "victory",
-          pendingWinner: prev.currentPlayer,
-          pendingCarry:  [r, c],
-          vanishedCoord: vanished || null,
-          newCoord:      placedKey,
-          heartCoord:    null,
+          board:          newBoard,
+          movesX:         newMovesX,
+          movesO:         newMovesO,
+          winningCombo:   winCombo,
+          phase:          "victory",
+          pendingWinner:  prev.currentPlayer,
+          pendingCarry:   [r, c],
+          vanishedCoord:  vanished || null,
+          newCoord:       placedKey,
+          heartCoord:     null,
+          heartCollected, // pass to victory effect so passive gain skips
         };
       }
 
       return {
         ...prev,
-        board:         newBoard,
-        movesX:        newMovesX,
-        movesO:        newMovesO,
-        winningCombo:  null,
-        phase:         "playing",
-        currentPlayer: prev.currentPlayer === "X" ? "O" : "X",
-        vanishedCoord: vanished || null,
-        newCoord:      placedKey,
-        heartCoord:    newHeartCoord,
+        board:          newBoard,
+        movesX:         newMovesX,
+        movesO:         newMovesO,
+        winningCombo:   null,
+        phase:          "playing",
+        currentPlayer:  prev.currentPlayer === "X" ? "O" : "X",
+        vanishedCoord:  vanished || null,
+        newCoord:       placedKey,
+        heartCoord:     newHeartCoord,
+        heartCollected: false,
       };
     });
   }
@@ -294,17 +300,18 @@ export default function GameScreen({ vsComputer, onExit }) {
       : null;
 
     setGameState({
-      board:         freshBoard,
-      movesX:        newMovesX,
-      movesO:        newMovesO,
-      currentPlayer: nextPlayer,
-      phase:         "playing",
-      winningCombo:  null,
-      pendingWinner: null,
-      pendingCarry:  null,
-      vanishedCoord: null,
-      newCoord:      key,
-      heartCoord:    heartCoord || null,
+      board:          freshBoard,
+      movesX:         newMovesX,
+      movesO:         newMovesO,
+      currentPlayer:  nextPlayer,
+      phase:          "playing",
+      winningCombo:   null,
+      pendingWinner:  null,
+      pendingCarry:   null,
+      vanishedCoord:  null,
+      newCoord:       key,
+      heartCoord:     heartCoord || null,
+      heartCollected: false,
     });
   }
 
