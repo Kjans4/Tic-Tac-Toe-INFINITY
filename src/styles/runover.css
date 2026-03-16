@@ -116,48 +116,84 @@
   vertical-align: middle;
 }
 
-.runover-btn {
+.runover-buttons {
+  display: flex;
+  gap: clamp(10px, 3vw, 14px);
   width: 100%;
-  padding: clamp(14px, 3.5vw, 18px) 0;
+}
+
+.runover-btn {
+  flex: 1;
+  padding: clamp(12px, 3vw, 16px) 0;
   font-family: 'Courier Prime', monospace;
-  font-size: clamp(0.85rem, 2.5vw, 1rem);
+  font-size: clamp(0.8rem, 2.5vw, 0.95rem);
   font-weight: bold;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: #ffffff;
-  background: #ef4444;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  box-shadow:
-    0 0 18px rgba(239, 68, 68, 0.5),
-    4px 4px 0 rgba(0, 0, 0, 0.5);
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
-.runover-btn:hover {
-  transform: translateY(-3px);
-  background: #ff6b6b;
+/* New Run — gold */
+.runover-btn--restart {
+  background: #f7d51d;
+  color: #1e1e2e;
   box-shadow:
-    0 0 28px rgba(239, 68, 68, 0.7),
+    0 0 18px rgba(247, 213, 29, 0.5),
+    4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+.runover-btn--restart:hover {
+  transform: translateY(-3px);
+  background: #ffef8a;
+  box-shadow:
+    0 0 28px rgba(247, 213, 29, 0.7),
     4px 7px 0 rgba(0, 0, 0, 0.5);
 }
 
-.runover-btn:active {
-  transform: translateY(1px);
+/* Exit — red */
+.runover-btn--exit {
+  background: transparent;
+  color: #ef4444;
+  border: 2px solid #ef4444;
   box-shadow:
-    0 0 14px rgba(239, 68, 68, 0.5),
-    2px 2px 0 rgba(0, 0, 0, 0.5);
+    0 0 12px rgba(239, 68, 68, 0.3),
+    4px 4px 0 rgba(0, 0, 0, 0.5);
+}
+
+.runover-btn--exit:hover {
+  transform: translateY(-3px);
+  background: rgba(239, 68, 68, 0.1);
+  box-shadow:
+    0 0 22px rgba(239, 68, 68, 0.55),
+    4px 7px 0 rgba(0, 0, 0, 0.5);
+}
+
+.runover-btn--restart:active,
+.runover-btn--exit:active {
+  transform: translateY(1px);
 }
 
 @media (hover: none) {
-  .runover-btn:hover {
+  .runover-btn--restart:hover {
     transform: none;
-    background: #ef4444;
-    box-shadow: 0 0 18px rgba(239, 68, 68, 0.5), 4px 4px 0 rgba(0, 0, 0, 0.5);
+    background: #f7d51d;
+    box-shadow: 0 0 18px rgba(247, 213, 29, 0.5), 4px 4px 0 rgba(0, 0, 0, 0.5);
   }
-  .runover-btn:active {
+  .runover-btn--exit:hover {
+    transform: none;
+    background: transparent;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.3), 4px 4px 0 rgba(0, 0, 0, 0.5);
+  }
+  .runover-btn--restart:active {
+    background: #ffef8a;
     transform: translateY(2px);
-    background: #ff6b6b;
+  }
+  .runover-btn--exit:active {
+    background: rgba(239, 68, 68, 0.15);
+    transform: translateY(2px);
   }
 }

@@ -1,6 +1,6 @@
 import "../styles/runover.css";
 
-export default function RunOverScreen({ visible, playerScore, bestScore, onRestart }) {
+export default function RunOverScreen({ visible, playerScore, bestScore, onRestart, onExit }) {
   if (!visible) return null;
 
   const isNewBest = playerScore > 0 && playerScore >= bestScore;
@@ -28,9 +28,14 @@ export default function RunOverScreen({ visible, playerScore, bestScore, onResta
 
         <div className="runover-divider" />
 
-        <button className="runover-btn" onClick={onRestart}>
-          START NEW RUN
-        </button>
+        <div className="runover-buttons">
+          <button className="runover-btn runover-btn--restart" onClick={onRestart}>
+            NEW RUN
+          </button>
+          <button className="runover-btn runover-btn--exit" onClick={onExit}>
+            EXIT
+          </button>
+        </div>
       </div>
     </div>
   );
