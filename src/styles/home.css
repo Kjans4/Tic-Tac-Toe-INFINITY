@@ -247,3 +247,47 @@
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-12px); }
 }
+
+.how-to-difficulty {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 12px);
+  width: 100%;
+}
+
+.how-to-diff-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 3vw, 14px);
+}
+
+.how-to-diff-row .how-to-rule-text {
+  margin: 0;
+}
+
+.how-to-highlight--easy {
+  color: #4ade80;
+  border-color: #4ade80;
+  text-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
+  white-space: nowrap;
+}
+
+.how-to-highlight--medium {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  text-shadow: 0 0 6px rgba(247, 213, 29, 0.6);
+  white-space: nowrap;
+}
+
+.how-to-highlight--hard {
+  color: var(--color-x);
+  border-color: var(--color-x);
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+  white-space: nowrap;
+}
+
+.how-to-highlight--heart {
+  color: var(--color-x);
+  border-color: var(--color-x);
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+}
