@@ -3,7 +3,7 @@ import { WIN_CONDITIONS, coordKey } from "./gameLogic";
 // --- Difficulty Thresholds ---
 // Based on total rounds played (scores.X + scores.O)
 export function getDifficulty(totalScore) {
-  if (totalScore >= 8) return "hard";
+  if (totalScore >= 6) return "hard";
   if (totalScore >= 3) return "medium";
   return "easy";
 }
