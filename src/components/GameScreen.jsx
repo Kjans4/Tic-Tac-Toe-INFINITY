@@ -278,7 +278,10 @@ export default function GameScreen({ vsComputer, onExit, onRunOver }) {
   }
 
   function clearAllTimers() {
-    [mainTimerRef, vanishTimerRef, newCoordTimerRef, heartAnimTimerRef].forEach(ref => clearTimeout(ref.current));
+    clearTimeout(mainTimerRef.current);
+    clearTimeout(vanishTimerRef.current);
+    clearTimeout(newCoordTimerRef.current);
+    clearTimeout(heartAnimTimerRef.current);
   }
 
   function handleRestart() {
@@ -296,7 +299,7 @@ export default function GameScreen({ vsComputer, onExit, onRunOver }) {
     clearAllTimers();
     setCelebration({ visible: false, mainText: "", flavorText: "", isLoss: false });
     setGame(INITIAL_GAME());
-  }
+}
 
   function handleResetScore() {
     setScores({ X: 0, O: 0 });
