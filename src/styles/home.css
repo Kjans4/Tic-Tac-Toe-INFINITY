@@ -1,61 +1,77 @@
+/* ─────────────────────────────────────────────
+   Home Screen
+───────────────────────────────────────────── */
 .home-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(24px, 6vw, 40px);
+  gap: clamp(20px, 5vw, 36px);
   width: 100%;
+  padding-bottom: clamp(24px, 6vw, 40px);
   animation: float 6s ease-in-out infinite;
 }
 
+/* ── Title ─────────────────────────────────── */
 .home-title-group {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: clamp(6px, 1.5vw, 10px);
+  padding-top: clamp(8px, 2vw, 16px);
 }
 
 .home-subtitle {
-  font-size: clamp(0.7rem, 2.5vw, 1rem);
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 4px;
+  font-size: clamp(0.65rem, 2vw, 0.85rem);
+  font-family: var(--font-main);
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 6px;
   text-transform: uppercase;
 }
 
 .home-title {
-  font-size: clamp(2.4rem, 12vw, 4rem);
+  font-size: clamp(2.6rem, 13vw, 4.2rem);
   font-weight: bold;
+  font-family: var(--font-main);
   color: var(--color-gold);
+  letter-spacing: clamp(4px, 2vw, 10px);
   text-shadow:
-    0 0 10px var(--color-gold),
-    0 0 30px rgba(247, 213, 29, 0.4),
-    0 0 60px rgba(247, 213, 29, 0.15);
-  letter-spacing: clamp(2px, 1vw, 6px);
+    0 0 8px  var(--color-gold),
+    0 0 24px rgba(247, 213, 29, 0.55),
+    0 0 56px rgba(247, 213, 29, 0.2),
+    0 0 100px rgba(247, 213, 29, 0.08);
 }
 
+/* ── Buttons ───────────────────────────────── */
 .home-buttons {
   display: flex;
   flex-direction: column;
-  gap: clamp(10px, 3vw, 16px);
+  gap: clamp(10px, 2.5vw, 14px);
   width: 100%;
 }
 
 .home-btn {
-  padding: clamp(12px, 3vw, 16px) 0;
-  font-size: clamp(0.8rem, 2.5vw, 1rem);
+  padding: clamp(13px, 3vw, 17px) 0;
+  font-size: clamp(0.78rem, 2.5vw, 0.95rem);
   font-weight: bold;
   font-family: var(--font-main);
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   text-transform: uppercase;
   background: var(--color-cell-bg);
-  color: #fff;
+  color: rgba(255, 255, 255, 0.8);
   border: 2px solid var(--color-cell-border);
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
-  transition: var(--transition-bounce);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.6);
+  transition:
+    transform    0.18s cubic-bezier(0.175, 0.885, 0.32, 1.4),
+    box-shadow   0.18s ease,
+    border-color 0.18s ease,
+    color        0.18s ease,
+    background   0.18s ease;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  touch-action: manipulation;
 }
 
 .home-btn:hover {
@@ -63,11 +79,18 @@
   background: var(--color-cell-hover);
   border-color: var(--color-gold);
   color: var(--color-gold);
-  text-shadow: 0 0 10px var(--color-gold);
-  box-shadow: 0 0 15px rgba(247, 213, 29, 0.3), 4px 8px 0px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 0 10px rgba(247, 213, 29, 0.7);
+  box-shadow:
+    0 8px 0 rgba(0, 0, 0, 0.5),
+    0 0 18px rgba(247, 213, 29, 0.25);
 }
 
-/* How To Play */
+.home-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+}
+
+/* ── How To Play ───────────────────────────── */
 .how-to-play {
   width: 100%;
   display: flex;
@@ -81,18 +104,24 @@
   align-items: center;
   padding: clamp(10px, 2.5vw, 14px) clamp(14px, 3vw, 18px);
   font-family: var(--font-main);
-  font-size: clamp(0.75rem, 2.5vw, 0.85rem);
+  font-size: clamp(0.72rem, 2.2vw, 0.82rem);
   font-weight: bold;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.45);
   background: var(--color-cell-bg);
   border: 2px solid var(--color-cell-border);
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: var(--transition-bounce);
-  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.5);
+  transition:
+    border-color  0.2s ease,
+    color         0.2s ease,
+    text-shadow   0.2s ease,
+    border-radius 0.2s ease,
+    box-shadow    0.2s ease;
   width: 100%;
+  touch-action: manipulation;
 }
 
 .how-to-toggle:hover {
@@ -101,101 +130,136 @@
   text-shadow: 0 0 8px rgba(247, 213, 29, 0.5);
 }
 
+/* Open state — merges visually with panel below */
 .how-to-toggle--open {
   border-color: var(--color-gold);
   color: var(--color-gold);
-  border-bottom-left-radius: 0;
+  text-shadow: 0 0 8px rgba(247, 213, 29, 0.4);
+  border-bottom-left-radius:  0;
   border-bottom-right-radius: 0;
-  border-bottom-color: transparent;
-  box-shadow: 4px 0px 0px rgba(0, 0, 0, 0.5);
+  border-bottom-color: rgba(247, 213, 29, 0.15);
+  box-shadow: none;
 }
 
 .how-to-arrow {
-  font-size: 0.7rem;
-  transition: transform 0.3s ease;
+  font-size: 0.65rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
 }
 
-/* Collapsible panel */
+.how-to-toggle--open .how-to-arrow {
+  opacity: 1;
+}
+
+/* ── Collapsible panel ─────────────────────── */
 .how-to-body {
   display: grid;
   grid-template-rows: 0fr;
-  transition: grid-template-rows 0.35s ease;
+  transition: grid-template-rows 0.38s cubic-bezier(0.4, 0, 0.2, 1);
   background: var(--color-cell-bg);
   border: 2px solid transparent;
   border-top: none;
-  border-bottom-left-radius: 6px;
-  border-bottom-right-radius: 6px;
+  border-bottom-left-radius:  8px;
+  border-bottom-right-radius: 8px;
 }
 
 .how-to-body--open {
   grid-template-rows: 1fr;
   border-color: var(--color-gold);
   border-top: none;
-  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.4);
 }
 
-/* Inner wrapper needed for grid-template-rows collapse trick */
+/* overflow hidden required for grid collapse trick */
 .how-to-content {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: 0;
-  transition: padding 0.35s ease;
+  gap: clamp(14px, 3.5vw, 20px);
+  padding: 0 clamp(14px, 3vw, 20px);
+  max-height: 0;
+  transition:
+    max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+    padding    0.38s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .how-to-body--open .how-to-content {
-  padding: clamp(14px, 3vw, 20px);
-  gap: clamp(12px, 3vw, 16px);
+  max-height: 1200px;
+  padding: clamp(16px, 4vw, 24px) clamp(14px, 3vw, 20px);
 }
 
+/* ── Rule blocks ───────────────────────────── */
 .how-to-rule {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: clamp(6px, 1.5vw, 10px);
 }
 
 .how-to-rule-title {
-  font-size: clamp(0.65rem, 2vw, 0.75rem);
+  font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+  font-family: var(--font-main);
   font-weight: bold;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
   color: var(--color-gold);
-  text-shadow: 0 0 8px rgba(247, 213, 29, 0.4);
+  text-shadow: 0 0 10px rgba(247, 213, 29, 0.45);
 }
 
 .how-to-rule-text {
-  font-size: clamp(0.75rem, 2.5vw, 0.85rem);
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.6;
-  letter-spacing: 0.5px;
+  font-size: clamp(0.75rem, 2.3vw, 0.85rem);
+  font-family: var(--font-main);
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.65;
+  letter-spacing: 0.3px;
 }
 
 .how-to-divider {
   height: 1px;
-  background: var(--color-cell-border);
+  background: rgba(255, 255, 255, 0.07);
   width: 100%;
 }
 
-/* Inline color highlights */
+/* ── Difficulty rows ───────────────────────── */
+.how-to-difficulty {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 2vw, 12px);
+  width: 100%;
+}
+
+.how-to-diff-row {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2.5vw, 14px);
+}
+
+.how-to-diff-row .how-to-rule-text {
+  margin: 0;
+}
+
+/* ── Color chips ───────────────────────────── */
 .how-to-colors {
   display: flex;
-  gap: clamp(10px, 3vw, 16px);
+  gap: clamp(8px, 2.5vw, 12px);
   flex-wrap: wrap;
 }
 
 .how-to-highlight {
-  font-size: clamp(0.7rem, 2vw, 0.8rem);
+  font-size: clamp(0.65rem, 1.8vw, 0.75rem);
+  font-family: var(--font-main);
   font-weight: bold;
-  letter-spacing: 1px;
+  letter-spacing: 1.5px;
   padding: 3px 10px;
   border-radius: 4px;
   border: 1px solid;
+  white-space: nowrap;
 }
 
+/* Warning — neutral white since it now matches player color in-game */
 .how-to-highlight--pink {
-  color: #ffb6c1;
-  border-color: #ffb6c1;
-  text-shadow: 0 0 6px rgba(255, 182, 193, 0.6);
+  color: rgba(255, 255, 255, 0.7);
+  border-color: rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 6px rgba(255, 255, 255, 0.2);
 }
 
 .how-to-highlight--x {
@@ -216,78 +280,71 @@
   text-shadow: 0 0 6px rgba(247, 213, 29, 0.5);
 }
 
-/* Touch devices */
+.how-to-highlight--heart {
+  color: var(--color-x);
+  border-color: var(--color-x);
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+.how-to-highlight--easy {
+  color: #4ade80;
+  border-color: #4ade80;
+  text-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+
+.how-to-highlight--medium {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+  text-shadow: 0 0 6px rgba(247, 213, 29, 0.5);
+}
+
+.how-to-highlight--hard {
+  color: var(--color-x);
+  border-color: var(--color-x);
+  text-shadow: 0 0 6px rgba(239, 68, 68, 0.5);
+}
+
+/* ── Touch devices ─────────────────────────── */
 @media (hover: none) {
   .home-btn:hover {
     transform: none;
-    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
+    background: var(--color-cell-bg);
+    border-color: var(--color-cell-border);
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: none;
+    box-shadow: 0 4px 0 rgba(0, 0, 0, 0.6);
   }
 
   .home-btn:active {
     transform: translateY(2px);
-    box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
     border-color: var(--color-gold);
     color: var(--color-gold);
-    text-shadow: 0 0 10px var(--color-gold);
+    text-shadow: 0 0 10px rgba(247, 213, 29, 0.7);
+    box-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
   }
 
   .how-to-toggle:hover {
     border-color: var(--color-cell-border);
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.45);
     text-shadow: none;
   }
 
   .how-to-toggle:active {
     border-color: var(--color-gold);
     color: var(--color-gold);
+    text-shadow: 0 0 8px rgba(247, 213, 29, 0.5);
   }
 }
 
+/* ── Float animation ───────────────────────── */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-12px); }
+  50%       { transform: translateY(-8px); }
 }
 
-.how-to-difficulty {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(8px, 2vw, 12px);
-  width: 100%;
-}
-
-.how-to-diff-row {
-  display: flex;
-  align-items: center;
-  gap: clamp(10px, 3vw, 14px);
-}
-
-.how-to-diff-row .how-to-rule-text {
-  margin: 0;
-}
-
-.how-to-highlight--easy {
-  color: #4ade80;
-  border-color: #4ade80;
-  text-shadow: 0 0 6px rgba(74, 222, 128, 0.6);
-  white-space: nowrap;
-}
-
-.how-to-highlight--medium {
-  color: var(--color-gold);
-  border-color: var(--color-gold);
-  text-shadow: 0 0 6px rgba(247, 213, 29, 0.6);
-  white-space: nowrap;
-}
-
-.how-to-highlight--hard {
-  color: var(--color-x);
-  border-color: var(--color-x);
-  text-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
-  white-space: nowrap;
-}
-
-.how-to-highlight--heart {
-  color: var(--color-x);
-  border-color: var(--color-x);
-  text-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+/* Disable float on short screens to prevent layout shift */
+@media (max-height: 680px) {
+  .home-container {
+    animation: none;
+  }
 }
