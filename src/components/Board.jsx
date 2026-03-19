@@ -19,21 +19,23 @@ export default function Board({
   }
 
   return (
-    <div className="board-grid">
-      {Array.from({ length: 3 }, (_, r) =>
-        Array.from({ length: 3 }, (_, c) => {
-          const key = `${r},${c}`;
-          return (
-            <Cell
-              key={key}
-              value={board[key]}
-              highlight={getHighlight(key)}
-              isNew={newCoord === key}
-              onClick={() => onCellClick(r, c)}
-            />
-          );
-        })
-      )}
+    <div className="board-perspective">
+      <div className="board-grid">
+        {Array.from({ length: 3 }, (_, r) =>
+          Array.from({ length: 3 }, (_, c) => {
+            const key = `${r},${c}`;
+            return (
+              <Cell
+                key={key}
+                value={board[key]}
+                highlight={getHighlight(key)}
+                isNew={newCoord === key}
+                onClick={() => onCellClick(r, c)}
+              />
+            );
+          })
+        )}
+      </div>
     </div>
   );
 }

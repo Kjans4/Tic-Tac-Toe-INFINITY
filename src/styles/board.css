@@ -1,7 +1,17 @@
+/* ─────────────────────────────────────────────
+   Board
+───────────────────────────────────────────── */
+
+/* Perspective wrapper sits outside the grid
+   for more accurate 3D calculation per cell */
+.board-perspective {
+  perspective: 1000px;
+  perspective-origin: 50% 40%;
+}
+
 .board-grid {
   display: grid;
   grid-template-columns: repeat(3, var(--cell-size));
   grid-template-rows:    repeat(3, var(--cell-size));
   gap: var(--cell-gap);
-  perspective: 1000px;
 }
