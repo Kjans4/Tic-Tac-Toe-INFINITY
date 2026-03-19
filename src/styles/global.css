@@ -7,50 +7,65 @@
 }
 
 :root {
+  /* ── Brand colors ──────────────────────────── */
   --color-gold:        #f7d51d;
   --color-gold-dim:    #b59a00;
   --color-gold-light:  #ffef8a;
-  --color-warning:     #ff6b6b;
   --color-x:           #ef4444;
   --color-x-bg:        #351a1a;
-  --color-x-border:    #ef4444;
   --color-o:           #3b82f6;
   --color-o-bg:        #1a2535;
-  --color-o-border:    #3b82f6;
+
+  /* ── Backgrounds ───────────────────────────── */
   --color-bg-dark:     #000000;
   --color-bg-mid:      #1e1e2e;
+
+  /* ── UI surfaces ───────────────────────────── */
   --color-cell-bg:     #2a2d3e;
   --color-cell-border: #454962;
   --color-cell-hover:  #3b3f58;
-  --font-main:         'Courier Prime', monospace;
-  --transition-bounce: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-  /*
-    Board sizing strategy:
-    Container max-width is 480px with 32px padding on each side = 416px usable.
-    Board = 3 cells + 2 gaps. We want cells to fill that space.
-    --cell-gap is fixed at 10px.
-    --cell-size = (100vw - 2*padding - 2*gap) / 3, capped at 130px for desktop.
-    calc((100vw - 64px - 20px) / 3) = calc((100vw - 84px) / 3)
-  */
+  /* ── Typography ────────────────────────────── */
+  --font-main: 'Courier Prime', monospace;
+
+  /* ── Transitions ───────────────────────────── */
+  --transition-bounce: all 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.4);
+
+  /* ── Board sizing ──────────────────────────────────────────────────
+     Container max-width: 480px
+     Padding range:       12px – 32px each side (clamp in .app-wrapper)
+     Using worst-case: 12px padding each side = 24px total padding
+     Plus 2 gaps of 10px = 44px total to subtract from 100vw.
+     Cell size = (100vw - 44px) / 3, capped at 130px on desktop.
+  ─────────────────────────────────────────────────────────────────── */
   --cell-gap:  10px;
-  --cell-size: clamp(100px, calc((100vw - 84px) / 3), 130px);
+  --cell-size: clamp(100px, calc((100vw - 44px) / 3), 130px);
   --cell-font: clamp(2rem, 8vw, 3rem);
 }
 
+/* ── Base ──────────────────────────────────── */
 body {
-  background: radial-gradient(circle, var(--color-bg-mid) 0%, var(--color-bg-dark) 100%);
+  background: radial-gradient(
+    circle,
+    var(--color-bg-mid)  0%,
+    var(--color-bg-dark) 100%
+  );
   min-height: 100vh;
   min-height: 100dvh;
   display: flex;
-  align-items: center;
+  /* flex-start lets the wrapper handle its own centering —
+     avoids double-centering on tall screens */
+  align-items: flex-start;
   justify-content: center;
   font-family: var(--font-main);
   color: #fff;
   overflow-x: hidden;
   overflow-y: auto;
+  /* Prevents 300ms tap delay on older Android browsers */
+  touch-action: manipulation;
 }
 
+/* ── App wrapper ───────────────────────────── */
 .app-wrapper {
   position: relative;
   width: 100%;
@@ -59,21 +74,37 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: auto;
   min-height: 100dvh;
   justify-content: center;
-  -webkit-overflow-scrolling: touch; 
+  margin: 0 auto;
 }
 
-/* CRT scanline overlay */
+/* ── CRT scanline overlay ──────────────────── */
 .app-wrapper::before {
   content: '';
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
   background:
-    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
-    linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    linear-gradient(
+      rgba(18, 16, 16, 0)    50%,
+      rgba(0, 0, 0, 0.18)    50%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 0, 0, 0.05),
+      rgba(0, 255, 0, 0.02),
+      rgba(0, 0, 255, 0.05)
+    );
   background-size: 100% 4px, 3px 100%;
   pointer-events: none;
   z-index: 100;
+}
+
+/* ── Small screen safety net ───────────────── */
+@media (max-width: 340px) {
+  :root {
+    --cell-gap:  8px;
+    --cell-size: calc((100vw - 32px) / 3);
+    --cell-font: 1.8rem;
+  }
 }
