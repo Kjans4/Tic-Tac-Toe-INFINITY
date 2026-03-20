@@ -39,7 +39,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <span className="footer-copyright">© 2025 YOUR NAME. All rights reserved.</span>
+        <span className="footer-copyright">© 2026 YOUR NAME. All rights reserved.</span>
         <span className="footer-sounds">SFX from YOUR_SFX_SOURCE</span>
       </div>
     </footer>
