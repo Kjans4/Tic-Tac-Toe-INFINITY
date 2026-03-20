@@ -100,7 +100,7 @@ export default function HomeScreen({ onStartGame }) {
                 </div>
                 <div className="how-to-diff-row">
                   <span className="how-to-highlight how-to-highlight--medium">MEDIUM</span>
-                  <span className="how-to-rule-text">Score 3 – 7. Win, block, center.</span>
+                  <span className="how-to-rule-text">Score 3 – 6. Win, block, center.</span>
                 </div>
                 <div className="how-to-diff-row">
                   <span className="how-to-highlight how-to-highlight--hard">HARD</span>
