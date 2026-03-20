@@ -4,10 +4,10 @@ const SOUNDS = {
   click:     { src: "/sfx/click.wav" },
   warning:   { src: "/sfx/warning.wav" },
   win:       { src: "/sfx/win.wav" },
-  lose:      { src: "/sfx/lose.wav",      duration: 1 }, // only first 1s is useful
+  lose:      { src: "/sfx/lose.wav",      duration: 2 }, 
   heartGain: { src: "/sfx/heart-gain.wav" },
   heartLose: { src: "/sfx/heart-lose.wav" },
-  gameOver:  { src: "/sfx/game-over.wav", duration: 1 }, // only first 1s is useful
+  gameOver:  { src: "/sfx/game-over.wav", duration: 2 }, 
   whoosh:    { src: "/sfx/whoosh.wav" },
 };
 
