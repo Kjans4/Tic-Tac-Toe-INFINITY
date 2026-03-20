@@ -250,14 +250,8 @@ export default function GameScreen({ vsComputer, onExit, onRunOver }) {
         () => setGame((s) => ({ ...s, newCoord: null })),
         320
       );
-
       // SFX — click on every placement
       play("click", 0.5);
-
-      // SFX — warning when oldest mark is about to vanish
-      const currentQueue = prev.currentPlayer === "X" ? prev.movesX : prev.movesO;
-      if (currentQueue.length === 1) play("warning", 0.6);
-
       // Heart collection — player (X) only
       const isHeartCell = (
         vsComputer &&

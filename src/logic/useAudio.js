@@ -2,7 +2,6 @@ import { useRef, useEffect, useCallback } from "react";
 
 const SOUNDS = {
   click:     { src: "/sfx/click.wav" },
-  warning:   { src: "/sfx/warning.wav" },
   win:       { src: "/sfx/win.wav" },
   lose:      { src: "/sfx/lose.wav",      duration: 2 }, 
   heartGain: { src: "/sfx/heart-gain.wav" },
