@@ -2,17 +2,14 @@
    Home Screen
 ───────────────────────────────────────────── */
 
-/* Outer wrapper — fills the full app-wrapper height
-   and stacks content + footer naturally */
+/* Outer wrapper — stacks content + footer
+   No min-height so it never causes scrolling */
 .home-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
-  min-height: 100dvh;
-  padding-bottom: clamp(12px, 3vw, 20px);
-  /* Push content down slightly so title reads as centered */
-  padding-top: clamp(32px, 8vw, 60px);
+  gap: clamp(16px, 4vw, 24px);
 }
 
 /* Inner content — title, buttons, how to play */
@@ -23,8 +20,6 @@
   gap: clamp(20px, 5vw, 36px);
   width: 100%;
   animation: float 6s ease-in-out infinite;
-  /* Footer will follow naturally after this */
-  flex: 1;
 }
 
 /* ── Title ─────────────────────────────────── */

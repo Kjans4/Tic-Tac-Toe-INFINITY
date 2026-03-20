@@ -7,10 +7,8 @@
   flex-direction: column;
   align-items: center;
   gap: 5px;
-  padding: clamp(14px, 3vw, 20px) 0 clamp(6px, 2vw, 10px);
-  /* Tight top border — no huge gap above */
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  margin-top: clamp(16px, 4vw, 28px);
+  padding: clamp(95px, 3vw, 20px) 0 clamp(10px, 2vw, 10px);
+  margin-top: clamp(100px, 4vw, 28px);
 }
 
 /* ── Top row — title + version ─────────────── */
