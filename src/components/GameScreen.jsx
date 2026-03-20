@@ -256,7 +256,7 @@ export default function GameScreen({ vsComputer, onExit, onRunOver }) {
 
       // SFX — warning when oldest mark is about to vanish
       const currentQueue = prev.currentPlayer === "X" ? prev.movesX : prev.movesO;
-      if (currentQueue.length === 3) play("warning", 0.6);
+      if (currentQueue.length === 1) play("warning", 0.6);
 
       // Heart collection — player (X) only
       const isHeartCell = (
